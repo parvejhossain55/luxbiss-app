@@ -1,0 +1,103 @@
+.PHONY: dev build test lint run clean \
+       docker-up docker-down docker-build \
+       migrate-up migrate-down migrate-create \
+       tidy seed seed-fresh
+
+# ─── Variables ────────────────────────────────────────────────
+APP_NAME    := luxbiss-server
+SERVER_DIR  := luxbiss_server
+MAIN_PATH   := ./cmd/api
+BINARY      := ./bin/$(APP_NAME)
+MIGRATION_DIR := ./migrations
+DB_URL      ?= postgres://postgres:postgres@localhost:5432/luxbiss?sslmode=disable
+
+# ─── Development ──────────────────────────────────────────────
+
+## dev: Run with hot-reload (Air)
+dev:
+	@cd $(SERVER_DIR) && air -c .air.toml
+
+## run: Run without hot-reload
+run:
+	@cd $(SERVER_DIR) && go run $(MAIN_PATH)
+
+## build: Compile production binary
+build:
+	@echo "Building $(APP_NAME)..."
+	@cd $(SERVER_DIR) && CGO_ENABLED=0 go build -ldflags="-w -s" -o $(BINARY) $(MAIN_PATH)
+	@echo "Binary: $(SERVER_DIR)/$(BINARY)"
+
+## clean: Remove build artifacts
+clean:
+	@cd $(SERVER_DIR) && rm -rf ./bin ./tmp
+	@echo "Cleaned."
+
+# ─── Quality ─────────────────────────────────────────────────
+
+## test: Run all tests
+test:
+	@cd $(SERVER_DIR) && go test -v -race -count=1 ./...
+
+## test-cover: Run tests with coverage
+test-cover:
+	@cd $(SERVER_DIR) && go test -v -race -coverprofile=coverage.out ./...
+	@cd $(SERVER_DIR) && go tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report: $(SERVER_DIR)/coverage.html"
+
+## lint: Run linter
+lint:
+	@cd $(SERVER_DIR) && golangci-lint run ./...
+
+## tidy: Tidy and verify Go modules
+tidy:
+	@cd $(SERVER_DIR) && go mod tidy
+	@cd $(SERVER_DIR) && go mod verify
+
+# ─── Docker ──────────────────────────────────────────────────
+
+## docker-up: Start all services in development mode (with hot-reload)
+docker-up:
+	@docker compose up -d
+
+## docker-down: Stop all services
+docker-down:
+	@docker compose down
+
+## docker-build: Build the development image
+docker-build:
+	@docker compose build
+
+## docker-logs: View logs
+docker-logs:
+	@docker compose logs -f api
+
+# ─── Database Migrations ────────────────────────────────────
+
+## migrate-up: Apply all migrations
+migrate-up:
+	@cd $(SERVER_DIR) && migrate -path $(MIGRATION_DIR) -database "$(DB_URL)" up
+
+## migrate-down: Rollback last migration
+migrate-down:
+	@cd $(SERVER_DIR) && migrate -path $(MIGRATION_DIR) -database "$(DB_URL)" down 1
+
+## migrate-create: Create a new migration (usage: make migrate-create name=create_products)
+migrate-create:
+	@cd $(SERVER_DIR) && migrate create -ext sql -dir $(MIGRATION_DIR) -seq $(name)
+
+# ─── Seeding ──────────────────────────────────────────────────
+
+## seed: Run database seeders
+seed:
+	@cd $(SERVER_DIR) && go run ./cmd/seeder/main.go
+
+## seed-fresh: Truncate tables and run database seeders
+seed-fresh:
+	@cd $(SERVER_DIR) && go run ./cmd/seeder/main.go -truncate
+
+# ─── Help ────────────────────────────────────────────────────
+
+## help: Show available commands
+help:
+	@echo "Available commands:"
+	@grep -E '^## ' Makefile | sed 's/## /  /'
