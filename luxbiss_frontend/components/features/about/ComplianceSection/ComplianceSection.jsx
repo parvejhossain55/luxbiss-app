@@ -2,22 +2,22 @@ import Image from "next/image";
 
 const items = [
   {
-    img: "/1c.png",
+    img: "/1c.webp",
     title: "Registered Business",
     desc: "Officially registered with relevant authorities",
   },
   {
-    img: "/2c.png",
+    img: "/2c.webp",
     title: "Trade License",
     desc: "Valid trade license for legal operations",
   },
   {
-    img: "/3c.png",
+    img: "/3c.webp",
     title: "SSL Secured",
     desc: "Advanced SSL encryption for data protection",
   },
   {
-    img: "/4c.png",
+    img: "/4c.webp",
     title: "Secure Infrastructure",
     desc: "Robust systems for operational safety",
   },

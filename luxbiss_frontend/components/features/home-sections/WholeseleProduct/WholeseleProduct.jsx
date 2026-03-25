@@ -1,5 +1,5 @@
 // app/components/StartInvestingCTA.jsx
-// Updated to use your image from /public/IP.png
+// Updated to use your image from /public/IP.webp
 
 import Image from "next/image";
 import { Check, ArrowRight } from "lucide-react";
@@ -61,7 +61,7 @@ export default function StartInvestingCTA() {
               <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
                 <div className="relative aspect-[16/7] w-full">
                   <Image
-                    src="/IP.png"
+                    src="/IP.webp"
                     alt="Start investing illustration"
                     fill
                     className="object-cover"

@@ -6,7 +6,7 @@
 // - Thin BLUE border around card
 // - Image container is a smaller white box with light border (not full-width heavy)
 // - Bubble colors (1 blue, 2-4 green) with subtle shadow
-// Uses: /public/1.jpg /2.jpg /3.jpg /4.png
+// Uses: /public/1.webp /2.webp /3.webp /4.webp
 
 import Image from "next/image";
 
@@ -16,28 +16,28 @@ const steps = [
     bubble: "bg-[#0B78C2]", // closer blue
     title: "Create an Account",
     desc: "Sign up for a free account\nin minutes",
-    img: "/1.jpg",
+    img: "/1.webp",
   },
   {
     n: 2,
     bubble: "bg-[#2E9E45]", // closer green
     title: "Invest in Products",
     desc: "Browse and invest in listed\nwholesale products",
-    img: "/2.jpg",
+    img: "/2.webp",
   },
   {
     n: 3,
     bubble: "bg-[#2E9E45]",
     title: "We Handle Sales &\nDelivery",
     desc: "We manage all sales, Shipping\nand customer service",
-    img: "/3.jpg",
+    img: "/3.webp",
   },
   {
     n: 4,
     bubble: "bg-[#2E9E45]",
     title: "Track Earnings",
     desc: "Watch your profits grow on\nyour dashboard",
-    img: "/4.png",
+    img: "/4.webp",
   },
 ];
 

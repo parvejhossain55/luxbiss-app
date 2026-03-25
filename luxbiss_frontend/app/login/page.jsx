@@ -192,7 +192,7 @@ function LeftShowcase() {
   return (
     <div className="relative hidden overflow-hidden lg:block">
       <img
-        src="/image.png"
+        src="/image.webp"
         alt="Luxbiss background"
         className="absolute inset-0 h-full w-full object-cover"
       />

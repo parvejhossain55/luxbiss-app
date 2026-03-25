@@ -7,7 +7,7 @@ export default function ReadyJourneySection() {
       {/* Background */}
       <div className="absolute inset-0">
         <Image
-          src="/ab.png"
+          src="/ab.webp"
           alt="Ready to Start Your Business Journey"
           fill
           priority

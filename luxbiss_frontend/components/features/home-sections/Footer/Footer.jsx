@@ -120,7 +120,7 @@ export default function Footer() {
             {/* Map image */}
             <div className="mt-4 h-20 w-20 overflow-hidden rounded-md bg-white ring-1 ring-slate-200">
               <Image
-                src="/Location.jpg"
+                src="/Location.webp"
                 alt="Location map"
                 width={80}
                 height={80}

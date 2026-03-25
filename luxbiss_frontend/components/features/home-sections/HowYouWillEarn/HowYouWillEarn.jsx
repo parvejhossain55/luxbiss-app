@@ -11,9 +11,9 @@ import Image from "next/image";
 import { Check } from "lucide-react";
 
 const flow = [
-  { title: "Your Investment", img: "/HE1.png" },
-  { title: "Product Sales", img: "/HE2.png" },
-  { title: "Profit Share", img: "/HE3.png" },
+  { title: "Your Investment", img: "/HE1.webp" },
+  { title: "Product Sales", img: "/HE2.webp" },
+  { title: "Profit Share", img: "/HE3.webp" },
 ];
 
 const points = [

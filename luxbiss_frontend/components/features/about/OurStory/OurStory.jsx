@@ -36,7 +36,7 @@ export default function OurStorySection() {
           <div className="flex justify-center md:justify-end">
             <div className="relative h-[220px] w-full max-w-[420px] overflow-hidden rounded-[999px] bg-slate-100 shadow-sm">
               <Image
-                src="/story.jpg"     // put story.jpg in /public
+                src="/story.webp"     // put story.webp in /public
                 alt="Our Story illustration"
                 fill
                 priority

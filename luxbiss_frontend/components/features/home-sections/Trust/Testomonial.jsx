@@ -9,7 +9,7 @@ const data = [
     name: "Rodolfo Berube",
     role: "Teacher",
     flag: "🇺🇸",
-    img: "/T1.png",
+    img: "/T1.webp",
     text:
       "As a teacher, I started with a small investment to create an extra income source. The platform manages everything professionally, and I can easily track my profits from the dashboard. I'm still investing and earning consistently.",
     rating: 5,
@@ -18,7 +18,7 @@ const data = [
     name: "Annabelle Heysen",
     role: "Housewife",
     flag: "🇦🇺",
-    img: "/T3.png",
+    img: "/T3.webp",
     text:
       "As a homemaker, I wanted to contribute financially without managing a full business. This platform made it possible. I started with a small investment and now I'm earning steady profits from home. It's simple, transparent, and easy to follow.",
     rating: 5,
@@ -27,7 +27,7 @@ const data = [
     name: "Lucas Eisenhower",
     role: "Taxi Driver",
     flag: "🇩🇪",
-    img: "/T2.jpg",
+    img: "/T2.webp",
     text:
       "As a taxi driver, I don’t have time to run a full business. This platform allows me to invest my savings while they manage everything. I can track my earnings easily, and it has become a reliable extra income source for me.",
     rating: 5,

@@ -17,7 +17,7 @@ without managing operations.`,
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
-          src="/about.png"
+          src="/about.webp"
           alt="Hero background"
           fill
           priority

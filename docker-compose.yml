@@ -30,6 +30,8 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: luxbiss-postgres
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
@@ -51,6 +53,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: luxbiss-redis
+    ports:
+      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:

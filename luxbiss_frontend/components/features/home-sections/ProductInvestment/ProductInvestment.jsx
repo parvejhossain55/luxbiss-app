@@ -1,7 +1,7 @@
 // app/components/ProductsYouCanInvestIn.jsx
 // Exact grid like your screenshot (8 cards + See All)
 // Uses your 8 images from /public root path:
-// /PI8.png, /PI6.png, /PI4.png, /PI5.png, /PI3.jpg, /PI2.jpg, /PI7.jpg, /P1.png
+// /PI8.webp, /PI6.webp, /PI4.webp, /PI5.webp, /PI3.webp, /PI2.webp, /PI7.webp, /P1.webp
 
 import Image from "next/image";
 
@@ -10,49 +10,49 @@ const products = [
     title: "Fashion Accessories",
     invest: "$15-$4000",
     profit: "10%-22%",
-    img: "/P1.png",
+    img: "/P1.webp",
   },
   {
     title: "Smart Devices",
     invest: "$200-$5000",
     profit: "10%-20%",
-    img: "/PI6.png",
+    img: "/PI6.webp",
   },
   {
     title: "Home Appliances",
     invest: "$30-$9000",
     profit: "10%-25%",
-    img: "/PI5.png",
+    img: "/PI5.webp",
   },
   {
     title: "Fitness Equipment",
     invest: "$25-$7000",
     profit: "10%-15%",
-    img: "/PI4.png",
+    img: "/PI4.webp",
   },
   {
     title: "Beauty",
     invest: "$10-$5000",
     profit: "10%-17%",
-    img: "/PI3.jpg",
+    img: "/PI3.webp",
   },
   {
     title: "Baby & Kids",
     invest: "$20-$3000",
     profit: "10%-22%",
-    img: "/PI2.jpg",
+    img: "/PI2.webp",
   },
   {
     title: "Kitchen & Dining",
     invest: "$10-$4500",
     profit: "10%-28%",
-    img: "/PI8.png",
+    img: "/PI8.webp",
   },
   {
     title: "Office",
     invest: "$30-$9000",
     profit: "10%-25%",
-    img: "/PI7.jpg",
+    img: "/PI7.webp",
   },
 ];
 

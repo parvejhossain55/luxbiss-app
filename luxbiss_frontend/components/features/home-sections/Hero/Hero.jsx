@@ -9,7 +9,7 @@ export default function HeroSection() {
       {/* Background image */}
       <div className="absolute inset-0 -z-10">
         <Image
-          src="/background.png" // put in /public/background.png
+          src="/background.webp" // put in /public/background.webp
           alt="Hero background"
           fill
           priority
