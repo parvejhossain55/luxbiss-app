@@ -14,7 +14,7 @@ services:
       - DB_PORT=5432
       - REDIS_HOST=redis
     volumes:
-      - ./public/uploads:/app/public/uploads
+      - ./luxbiss_server/public/uploads:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy

@@ -93,7 +93,7 @@ seed:
 
 ## seed-fresh: Truncate tables and run database seeders
 seed-fresh:
-	@cd $(SERVER_DIR) && go run ./cmd/seeder/main.go -truncate
+	@cd $(SERVER_DIR) && DB_HOST=localhost REDIS_HOST=localhost go run ./cmd/seeder/main.go -truncate
 
 # ─── Help ────────────────────────────────────────────────────
 

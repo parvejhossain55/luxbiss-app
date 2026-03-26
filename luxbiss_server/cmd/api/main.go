@@ -56,15 +56,47 @@ func ServeFrontend(router *gin.Engine) {
 			return
 		}
 
-		// Try to serve the file from the embedded filesystem
-		f, err := assets.Open(strings.TrimPrefix(path, "/"))
+		cleanPath := strings.TrimPrefix(path, "/")
+		if cleanPath == "" {
+			cleanPath = "index.html"
+		}
+
+		// 1. Try to serve the exact file (e.g. image.webp, _next/static/...)
+		f, err := assets.Open(cleanPath)
+		if err == nil {
+			stat, _ := f.Stat()
+			f.Close()
+			// If it's a directory, let http.FileServer handle resolving index.html,
+			// BUT io/fs doesn't like trailing slashes in Open(), so we must strip them previously
+			if !stat.IsDir() {
+				// Important: ensure c.Request.URL.Path matches what we found
+				c.Request.URL.Path = "/" + cleanPath
+				fileServer.ServeHTTP(c.Writer, c.Request)
+				return
+			}
+		}
+
+		// 2. Try the path with .html extension (Next.js default static export behavior)
+		htmlPath := strings.TrimSuffix(cleanPath, "/") + ".html"
+		f, err = assets.Open(htmlPath)
 		if err == nil {
 			f.Close()
+			c.Request.URL.Path = "/" + htmlPath
 			fileServer.ServeHTTP(c.Writer, c.Request)
 			return
 		}
 
-		// Otherwise, serve index.html (SPA routing fallback)
+		// 3. Try the path with /index.html (Next.js trailingSlash: true behavior)
+		indexPath := strings.TrimSuffix(cleanPath, "/") + "/index.html"
+		f, err = assets.Open(indexPath)
+		if err == nil {
+			f.Close()
+			c.Request.URL.Path = "/" + indexPath
+			fileServer.ServeHTTP(c.Writer, c.Request)
+			return
+		}
+
+		// 4. Otherwise, serve index.html (SPA routing fallback)
 		c.Request.URL.Path = "/"
 		fileServer.ServeHTTP(c.Writer, c.Request)
 	})

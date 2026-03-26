@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 
@@ -12,14 +14,69 @@ const NAV_ITEMS = [
   { label: "About Us", href: "/about" },
 ];
 
+const SECTION_LABELS = {
+  "#products": "Products",
+  "#how-it-works": "How It Works",
+  "#earnings": "Earnings",
+};
+
 export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("Home");
+  const normalizedPathname = pathname?.replace(/\/+$/, "") || "/";
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => (document.body.style.overflow = "");
   }, [open]);
+
+  useEffect(() => {
+    const syncActiveItem = () => {
+      if (normalizedPathname === "/about") {
+        setActive("About Us");
+        return;
+      }
+
+      if (normalizedPathname !== "/") {
+        setActive("");
+        return;
+      }
+
+      setActive(SECTION_LABELS[window.location.hash] || "Home");
+    };
+
+    syncActiveItem();
+    window.addEventListener("hashchange", syncActiveItem);
+
+    return () => window.removeEventListener("hashchange", syncActiveItem);
+  }, [normalizedPathname]);
+
+  const handleNavClick = (event, item) => {
+    event.preventDefault();
+    setActive(item.label);
+
+    if (!item.href.startsWith("#")) {
+      router.push(item.href);
+      setOpen(false);
+      return;
+    }
+
+    if (normalizedPathname !== "/") {
+      router.push(`/${item.href}`);
+      setOpen(false);
+      return;
+    }
+
+    const section = document.querySelector(item.href);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.history.replaceState(null, "", item.href);
+    }
+
+    setOpen(false);
+  };
 
   return (
     <header className="w-full">
@@ -30,12 +87,15 @@ export default function Navbar() {
         <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           {/* Logo */}
           <a href="#home" className="group flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
-              <span className="relative h-4 w-4">
-                <span className="absolute left-0 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-slate-900" />
-                <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-slate-900" />
-                <span className="absolute right-0 bottom-0 h-2 w-2 rounded-full bg-slate-900" />
-              </span>
+            <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+              <Image
+                src="/Logo.svg"
+                alt="Lux Biss logo"
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain"
+                priority
+              />
             </span>
 
             <span className="text-lg font-extrabold tracking-wide text-sky-600">
@@ -51,7 +111,7 @@ export default function Navbar() {
                 <a
                   key={item.label}
                   href={item.href}
-                  onClick={() => setActive(item.label)}
+                  onClick={(event) => handleNavClick(event, item)}
                   className={[
                     "text-sm font-medium transition-colors",
                     isActive
@@ -116,10 +176,7 @@ export default function Navbar() {
                   <a
                     key={item.label}
                     href={item.href}
-                    onClick={() => {
-                      setActive(item.label);
-                      setOpen(false);
-                    }}
+                    onClick={(event) => handleNavClick(event, item)}
                     className={[
                       "rounded-xl px-3 py-2 text-sm font-medium transition",
                       isActive

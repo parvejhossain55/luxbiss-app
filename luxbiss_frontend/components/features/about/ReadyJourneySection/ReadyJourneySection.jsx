@@ -17,7 +17,7 @@ export default function ReadyJourneySection() {
       </div>
 
       {/* Content */}
-      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
         <div className="h-[320px] sm:h-[360px] md:h-[400px] flex items-start pt-14">
           <div className="max-w-xl">
             <h2 className="text-[28px] font-extrabold leading-tight text-[#0B6C86] sm:text-[34px] md:text-[40px]">
@@ -33,17 +33,17 @@ export default function ReadyJourneySection() {
 
             <div className="mt-6 flex items-center gap-4">
               <Link
-                href="/get-started"
+                href="/registration"
                 className="rounded-full bg-[#0B6C86] px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:brightness-95"
               >
                 Get Started
               </Link>
 
               <Link
-                href="/contact"
+                href="/login"
                 className="rounded-full border border-[#0B6C86]/40 bg-white/70 px-6 py-2.5 text-sm font-semibold text-[#0B6C86] backdrop-blur-sm transition hover:bg-white/90"
               >
-                Contact Us
+                Login
               </Link>
             </div>
           </div>

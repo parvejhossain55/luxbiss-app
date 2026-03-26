@@ -19,11 +19,19 @@ export default function Home() {
   return (
     <div className="bg-white">
       <Navbar />
-      <Hero />
+      <section id="home" className="scroll-mt-24">
+        <Hero />
+      </section>
       <Business />
-      <Works />
-      <ProductInvestment />
-      <HowYouWillEarn />
+      <section id="how-it-works" className="scroll-mt-24">
+        <Works />
+      </section>
+      <section id="products" className="scroll-mt-24">
+        <ProductInvestment />
+      </section>
+      <section id="earnings" className="scroll-mt-24">
+        <HowYouWillEarn />
+      </section>
       <Testimonial />
       <StartInvestingCTA />
       <Footer />

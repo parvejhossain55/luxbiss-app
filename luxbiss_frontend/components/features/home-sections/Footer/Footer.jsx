@@ -1,5 +1,6 @@
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   Facebook,
   Twitter,
@@ -19,8 +20,15 @@ export default function Footer() {
           {/* Left: Logo + Subscribe + Social */}
           <div>
             <div className="flex items-center gap-2">
-              <div className="grid h-9 w-9 place-items-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
-                <span className="text-xs font-bold text-slate-700">LB</span>
+              <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+                <Image
+                  src="/Logo.svg"
+                  alt="Lux Biss logo"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6 object-contain"
+                  priority
+                />
               </div>
 
               <div className="text-lg font-extrabold tracking-wide text-sky-700">
@@ -73,9 +81,9 @@ export default function Footer() {
             <h4 className="text-sm font-extrabold text-sky-800">Quick Links</h4>
             <ul className="mt-4 space-y-2 text-sm text-slate-600">
               <li>
-                <a className="hover:text-sky-800" href="#about">
+                <Link className="hover:text-sky-800" href="/about">
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
                 <a className="hover:text-sky-800" href="#how-it-works">

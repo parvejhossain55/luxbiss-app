@@ -25,6 +25,11 @@ const inter = Inter({
 export const metadata = {
   title: "LuxBiss - Make Money Online",
   description: "Production-grade, reusable, scalable application for business investment.",
+  icons: {
+    icon: "/Logo.svg",
+    shortcut: "/Logo.svg",
+    apple: "/Logo.svg",
+  },
 };
 
 import AuthProvider from "@/components/providers/AuthProvider";
@@ -46,4 +51,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-

@@ -7,7 +7,7 @@ export default function HeroInvestment({
   description = `We create a business ecosystem where individuals
 can participate in real product-base commerce
 without managing operations.`,
-  primaryHref = "/opportunities",
+  primaryHref = "/registration",
   primaryText = "Explore Opportunities",
   secondaryHref = "/login",
   secondaryText = "Login",
@@ -30,7 +30,7 @@ without managing operations.`,
 
       {/* Content Wrapper */}
       <div className="relative z-10 flex min-h-screen items-center">
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="w-full md:max-w-[520px]">
             <h1 className="text-[28px] font-extrabold leading-tight tracking-tight text-[#0B6C86] sm:text-[36px] md:text-[44px]">
               {titleLine1}

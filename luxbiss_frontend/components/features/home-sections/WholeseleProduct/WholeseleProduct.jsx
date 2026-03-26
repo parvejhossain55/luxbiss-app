@@ -2,6 +2,7 @@
 // Updated to use your image from /public/IP.webp
 
 import Image from "next/image";
+import Link from "next/link";
 import { Check, ArrowRight } from "lucide-react";
 
 const points = [
@@ -43,12 +44,12 @@ export default function StartInvestingCTA() {
               </ul>
 
               <div className="mt-6">
-                <a
-                  href="#join"
+                <Link
+                  href="/registration"
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-800"
                 >
                   Join Now &amp; Start investing <ArrowRight className="h-4 w-4" />
-                </a>
+                </Link>
               </div>
 
               <p className="mt-3 text-[12px] text-slate-600">
