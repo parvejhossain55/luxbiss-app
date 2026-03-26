@@ -61,49 +61,60 @@ func ServeFrontend(router *gin.Engine) {
 			cleanPath = "index.html"
 		}
 
-		// 1. Try to serve the exact file (e.g. image.webp, _next/static/...)
+		// Helper to serve raw HTML safely without http.FileServer triggering 301 loops
+		serveHTML := func(filePath string) bool {
+			f, err := assets.Open(filePath)
+			if err == nil {
+				defer f.Close()
+				stat, _ := f.Stat()
+				if !stat.IsDir() {
+					content, _ := fs.ReadFile(assets, filePath)
+					c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
+					c.Status(http.StatusOK)
+					_, _ = c.Writer.Write(content)
+					return true
+				}
+			}
+			return false
+		}
+
+		// 1. If it's explicitly an HTML file or the root, serve it directly
+		if strings.HasSuffix(cleanPath, ".html") {
+			if serveHTML(cleanPath) {
+				return
+			}
+		}
+
+		// 2. Try to serve the exact file (e.g. image.webp, _next/static/...)
 		f, err := assets.Open(cleanPath)
 		if err == nil {
 			stat, _ := f.Stat()
 			f.Close()
-			// If it's a directory, let http.FileServer handle resolving index.html,
-			// BUT io/fs doesn't like trailing slashes in Open(), so we must strip them previously
 			if !stat.IsDir() {
-				// Important: ensure c.Request.URL.Path matches what we found
 				c.Request.URL.Path = "/" + cleanPath
 				fileServer.ServeHTTP(c.Writer, c.Request)
 				return
 			}
 		}
 
-		// 2. Try the path with .html extension (Next.js default static export behavior)
+		// 3. Try the path with .html extension (Next.js static export behavior)
 		htmlPath := strings.TrimSuffix(cleanPath, "/") + ".html"
-		f, err = assets.Open(htmlPath)
-		if err == nil {
-			f.Close()
-			c.Request.URL.Path = "/" + htmlPath
-			fileServer.ServeHTTP(c.Writer, c.Request)
+		if serveHTML(htmlPath) {
 			return
 		}
 
-		// 3. Try the path with /index.html (Next.js trailingSlash: true behavior)
+		// 4. Try the path with /index.html (Next.js trailingSlash: true behavior)
 		indexPath := strings.TrimSuffix(cleanPath, "/") + "/index.html"
-		f, err = assets.Open(indexPath)
-		if err == nil {
-			defer f.Close()
-			// DO NOT set path to /index.html because http.FileServer redirects index.html to /
-			// Instead, just serve the file content directly.
-			// Set the correct Content-Type for HTML.
-			c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-			c.Status(http.StatusOK)
-
-			// We can safely read it because frontendAssets is an embed.FS
-			content, _ := fs.ReadFile(assets, indexPath)
-			_, _ = c.Writer.Write(content)
+		if serveHTML(indexPath) {
 			return
 		}
 
-		// 4. Otherwise, serve index.html (SPA routing fallback)
+		// 5. Otherwise, serve index.html (SPA routing fallback)
+		if serveHTML("index.html") {
+			return
+		}
+
+		// Absolute fallback if everything fails
 		c.Request.URL.Path = "/"
 		fileServer.ServeHTTP(c.Writer, c.Request)
 	})
