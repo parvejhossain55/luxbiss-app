@@ -90,9 +90,16 @@ func ServeFrontend(router *gin.Engine) {
 		indexPath := strings.TrimSuffix(cleanPath, "/") + "/index.html"
 		f, err = assets.Open(indexPath)
 		if err == nil {
-			f.Close()
-			c.Request.URL.Path = "/" + indexPath
-			fileServer.ServeHTTP(c.Writer, c.Request)
+			defer f.Close()
+			// DO NOT set path to /index.html because http.FileServer redirects index.html to /
+			// Instead, just serve the file content directly.
+			// Set the correct Content-Type for HTML.
+			c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
+			c.Status(http.StatusOK)
+
+			// We can safely read it because frontendAssets is an embed.FS
+			content, _ := fs.ReadFile(assets, indexPath)
+			_, _ = c.Writer.Write(content)
 			return
 		}
 
