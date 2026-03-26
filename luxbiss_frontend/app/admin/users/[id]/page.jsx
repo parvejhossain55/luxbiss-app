@@ -1,11 +1,11 @@
 import AdminUserEditClient from "./AdminUserEditClient";
 
-export const dynamicParams = false;
-
-export async function generateStaticParams() {
-    return [{ id: 'dummy' }];
+// IMPORTANT: Do NOT set `dynamicParams = false` here, as it blocks all real IDs.
+// Instead, just return an empty array or a dummy so the Next.js static build passes!
+export function generateStaticParams() {
+    return [{ id: "user_slug" }];
 }
 
-export default async function Page({ params }) {
+export default function Page({ params }) {
     return <AdminUserEditClient params={params} />;
 }
