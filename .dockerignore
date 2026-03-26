@@ -30,7 +30,8 @@ yarn-error.log
 **/.dockerignore
 
 # Misc
-.env
+# Docker build needs .env for NEXT_PUBLIC_ variables during frontend compile
+# .env
 .env.local
 .env.production
 *.md

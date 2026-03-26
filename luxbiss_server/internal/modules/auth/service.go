@@ -105,6 +105,10 @@ func (s *Service) Login(ctx context.Context, req *LoginRequest) (*AuthResponse, 
 	rfKey := fmt.Sprintf("refresh_token:%s", existingUser.ID)
 	_ = s.rdb.Set(ctx, rfKey, claims.ID, s.jwtManager.GetRefreshTokenTTL()).Err()
 
+	// 🔒 Clear any session revocations (e.g. from a recent password change)
+	// so the user can use the app again with the NEW password immediately
+	_ = s.rdb.Del(ctx, "revoked_user:"+existingUser.ID).Err()
+
 	return &AuthResponse{
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
@@ -196,6 +200,9 @@ func (s *Service) GoogleLogin(ctx context.Context, req *GoogleOAuthRequest) (*Au
 	googleRefClaims, _ := s.jwtManager.ValidateToken(tokens.RefreshToken)
 	googRfKey := fmt.Sprintf("refresh_token:%s", existingUser.ID)
 	_ = s.rdb.Set(ctx, googRfKey, googleRefClaims.ID, s.jwtManager.GetRefreshTokenTTL()).Err()
+
+	// Clear any session revocations
+	_ = s.rdb.Del(ctx, "revoked_user:"+existingUser.ID).Err()
 
 	return &AuthResponse{
 		AccessToken:  tokens.AccessToken,

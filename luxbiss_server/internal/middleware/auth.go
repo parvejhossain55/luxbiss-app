@@ -73,6 +73,18 @@ func Auth(jwtManager *jwt.Manager, rdb *redis.Client) gin.HandlerFunc {
 			return
 		}
 
+		// 6. Check if user global state is revoked (Password change / Suspension)
+		revokedKey := fmt.Sprintf("revoked_user:%s", claims.UserID)
+		revoked, _ := rdb.Exists(c.Request.Context(), revokedKey).Result()
+		if revoked > 0 {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"success":    false,
+				"message":    "User session has been invalidated. Please login again.",
+				"request_id": c.GetString("request_id"),
+			})
+			return
+		}
+
 		c.Set("user_id", claims.UserID)
 		c.Set("user_email", claims.Email)
 		c.Set("user_role", claims.Role)

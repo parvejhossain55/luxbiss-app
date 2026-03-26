@@ -22,7 +22,8 @@ import { formatTableDate } from "@/lib/utils";
 export default function AdminUserEditPage() {
     const params = useParams();
     const router = useRouter();
-    const userId = params.id;
+    // Handle both [id] and [[...id]] catch-all params
+    const userId = Array.isArray(params.id) ? params.id[0] : params.id;
 
     const { fetchUser, updateUser, approveHoldBalance, isLoading: storeLoading } = useUserStore();
     const { fetchSummary } = useTransactionStore();

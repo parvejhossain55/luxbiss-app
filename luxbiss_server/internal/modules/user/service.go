@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/parvej/luxbiss_server/internal/common"
 	"github.com/parvej/luxbiss_server/internal/logger"
@@ -159,7 +160,7 @@ func (s *UserService) Update(ctx context.Context, id string, req *UpdateUserRequ
 	}
 
 	if shouldInvalidateTokens {
-		s.rdb.Del(ctx, "refresh_token:"+id)
+		s.InvalidateAllUserSessions(ctx, id)
 	}
 
 	s.log.Infow("User updated successfully", "user_id", id)
@@ -198,8 +199,20 @@ func (s *UserService) UpdatePassword(ctx context.Context, id string, hashedPassw
 		s.log.Errorw("Failed to update user password", "error", err, "user_id", id)
 		return common.ErrInternal(err)
 	}
+
+	s.InvalidateAllUserSessions(ctx, id)
 	s.log.Infow("User password updated successfully", "user_id", id)
 	return nil
+}
+
+func (s *UserService) InvalidateAllUserSessions(ctx context.Context, userID string) {
+	// 1. Invalidate Refresh Token (to prevent get new access token)
+	s.rdb.Del(ctx, "refresh_token:"+userID)
+
+	// 2. Set key to invalidate current access tokens (Access Token TTL is usually 1m-5m)
+	// We set this key for 5 minutes just to be sure all current access tokens are invalidated
+	revokedKey := "revoked_user:" + userID
+	_ = s.rdb.Set(ctx, revokedKey, "1", 5*time.Minute).Err()
 }
 
 func (s *UserService) ApproveHoldBalance(ctx context.Context, id string) (*User, error) {

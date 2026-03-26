@@ -1,9 +1,12 @@
 import AdminUserEditClient from "./AdminUserEditClient";
 
-// IMPORTANT: Do NOT set `dynamicParams = false` here, as it blocks all real IDs.
-// Instead, just return an empty array or a dummy so the Next.js static build passes!
+// Force static to help with the Go server embedding during final build
+export const dynamic = "force-static";
+
 export function generateStaticParams() {
-    return [{ id: "user_slug" }];
+    // Generates a single static shell at /admin/users/[id].html
+    // This allows the Go backend to serve this shell for all dynamic user IDs
+    return [{ id: "user_shell" }];
 }
 
 export default function Page({ params }) {

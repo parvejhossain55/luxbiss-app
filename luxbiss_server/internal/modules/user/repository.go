@@ -119,6 +119,7 @@ func (r *GormRepository) Update(ctx context.Context, user *User) error {
 		Updates(map[string]interface{}{
 			"name":                   user.Name,
 			"email":                  user.Email,
+			"password":               user.Password,
 			"role":                   user.Role,
 			"status":                 user.Status,
 			"profile_photo":          user.ProfilePhoto,
