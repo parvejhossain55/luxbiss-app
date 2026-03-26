@@ -201,7 +201,7 @@ func registerRoutes(
 	health.RegisterRoutes(api, healthHandler)
 
 	userRepo := user.NewGormRepository(db)
-	userService := user.NewService(userRepo, appLogger)
+	userService := user.NewService(userRepo, appLogger, rdb)
 	userHandler := user.NewHandler(userService, appLogger)
 	user.RegisterRoutes(api, userHandler, jwtManager, rdb)
 

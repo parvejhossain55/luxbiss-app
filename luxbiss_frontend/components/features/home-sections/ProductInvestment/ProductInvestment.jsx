@@ -1,9 +1,9 @@
 // app/components/ProductsYouCanInvestIn.jsx
-// Exact grid like your screenshot (8 cards + See All)
-// Uses your 8 images from /public root path:
-// /PI8.webp, /PI6.webp, /PI4.webp, /PI5.webp, /PI3.webp, /PI2.webp, /PI7.webp, /P1.webp
+"use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const products = [
   {
@@ -56,9 +56,13 @@ const products = [
   },
 ];
 
-function ProductCard({ item }) {
+function ProductCard({ item, onClick }) {
   return (
-    <div className="flex h-[304px] w-full flex-col items-center gap-2 rounded-2xl border border-[#A5E1F5] bg-white p-4">
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-[304px] w-full flex-col items-center gap-2 rounded-2xl border border-[#A5E1F5] bg-white p-4 text-left transition hover:shadow-[0_8px_24px_rgba(14,116,144,0.08)]"
+    >
       <div className="h-[168px] w-full overflow-hidden rounded-lg">
         <div className="relative h-full w-full">
           <Image
@@ -87,11 +91,23 @@ function ProductCard({ item }) {
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
 export default function ProductInvestment() {
+  const router = useRouter();
+  const { isAuthenticated, user } = useAuthStore();
+
+  const handleProductAccess = () => {
+    if (isAuthenticated || user) {
+      router.push("/product");
+      return;
+    }
+
+    router.push("/login?redirect=%2Fproduct");
+  };
+
   return (
     <section className="bg-white py-16">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -105,17 +121,18 @@ export default function ProductInvestment() {
 
         <div className="mt-10 grid justify-center gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((p) => (
-            <ProductCard key={p.title} item={p} />
+            <ProductCard key={p.title} item={p} onClick={handleProductAccess} />
           ))}
         </div>
 
         <div className="mt-10 flex justify-center">
-          <a
-            href="#products"
+          <button
+            type="button"
+            onClick={handleProductAccess}
             className="inline-flex items-center justify-center rounded-lg bg-sky-700 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-800"
           >
             See All
-          </a>
+          </button>
         </div>
       </div>
     </section>

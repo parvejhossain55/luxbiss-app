@@ -7,15 +7,17 @@ import (
 	"github.com/parvej/luxbiss_server/internal/common"
 	"github.com/parvej/luxbiss_server/internal/logger"
 	"github.com/parvej/luxbiss_server/pkg/hash"
+	"github.com/redis/go-redis/v9"
 )
 
 type UserService struct {
 	repo Repository
 	log  *logger.Logger
+	rdb  *redis.Client
 }
 
-func NewService(repo Repository, log *logger.Logger) *UserService {
-	return &UserService{repo: repo, log: log}
+func NewService(repo Repository, log *logger.Logger, rdb *redis.Client) *UserService {
+	return &UserService{repo: repo, log: log, rdb: rdb}
 }
 
 func (s *UserService) Create(ctx context.Context, req *CreateUserRequest) (*User, error) {
@@ -82,9 +84,23 @@ func (s *UserService) Update(ctx context.Context, id string, req *UpdateUserRequ
 	if req.Role != nil {
 		user.Role = *req.Role
 	}
-	if req.Status != nil {
+
+	shouldInvalidateTokens := false
+	if req.Status != nil && user.Status != *req.Status {
 		user.Status = *req.Status
+		if *req.Status != "active" {
+			shouldInvalidateTokens = true
+		}
 	}
+
+	if req.Password != nil {
+		hashed, err := hash.HashPassword(*req.Password)
+		if err == nil {
+			user.Password = hashed
+			shouldInvalidateTokens = true
+		}
+	}
+
 	if req.ProfilePhoto != nil {
 		user.ProfilePhoto = *req.ProfilePhoto
 	}
@@ -140,6 +156,10 @@ func (s *UserService) Update(ctx context.Context, id string, req *UpdateUserRequ
 	if err := s.repo.Update(ctx, user); err != nil {
 		s.log.Errorw("Failed to update user", "error", err, "user_id", id)
 		return nil, common.ErrInternal(err)
+	}
+
+	if shouldInvalidateTokens {
+		s.rdb.Del(ctx, "refresh_token:"+id)
 	}
 
 	s.log.Infow("User updated successfully", "user_id", id)

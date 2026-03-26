@@ -8,6 +8,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 export default function LuxbissRegisterSplit() {
   const router = useRouter();
   const { register, googleLogin, isLoading, error, clearError } = useAuthStore();
+  const googleClientIdConfigured = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -99,20 +100,30 @@ export default function LuxbissRegisterSplit() {
               <div className="relative">
                 <button
                   type="button"
+                  disabled={!googleClientIdConfigured}
                   className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#cfd6e6] bg-white py-2.5 text-[13px] font-medium text-[#111827] shadow-sm hover:bg-[#f7f9ff]"
                 >
                   <GoogleG />
-                  {isLoading ? "Connecting..." : "Register with Google"}
+                  {googleClientIdConfigured
+                    ? (isLoading ? "Connecting..." : "Register with Google")
+                    : "Google Signup Unavailable"}
                 </button>
 
-                <div className="absolute inset-0 opacity-0">
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={() => console.log("Google sign-in failed")}
-                    useOneTap={false}
-                  />
-                </div>
+                {googleClientIdConfigured && (
+                  <div className="absolute inset-0 opacity-0">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={() => console.log("Google sign-in failed")}
+                      useOneTap={false}
+                    />
+                  </div>
+                )}
               </div>
+              {!googleClientIdConfigured && (
+                <p className="mt-2 text-center text-[11px] text-red-600">
+                  Google signup is not configured. Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` first.
+                </p>
+              )}
             </div>
 
             {/* Divider */}

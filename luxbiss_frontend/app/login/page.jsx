@@ -1,14 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import { GoogleLogin } from "@react-oauth/google";
 
-export default function LuxbissLoginSplit() {
+function LuxbissLoginSplitContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, googleLogin, isLoading, error, clearError } = useAuthStore();
+  const redirectTo = searchParams.get("redirect");
+  const googleClientIdConfigured = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +21,10 @@ export default function LuxbissLoginSplit() {
     e.preventDefault();
     const res = await login(email, password);
     if (res.success) {
+      if (redirectTo) {
+        router.push(redirectTo);
+        return;
+      }
       // res.data is expected to contain the user object (either directly or in a 'user' property)
       // and user object should have a 'role' property
       const userData = res.data?.user || res.data;
@@ -35,6 +42,10 @@ export default function LuxbissLoginSplit() {
 
     const res = await googleLogin(token);
     if (res.success) {
+      if (redirectTo) {
+        router.push(redirectTo);
+        return;
+      }
       const userData = res.data?.user || res.data;
       if (userData?.role === "admin") {
         router.push("/admin/dashboard");
@@ -76,18 +87,27 @@ export default function LuxbissLoginSplit() {
               <div className="relative">
                 <button
                   type="button"
+                  disabled={!googleClientIdConfigured}
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#cfd6e6] bg-white py-2 text-[12px] font-medium text-[#111827] shadow-sm hover:bg-[#f7f9ff]"
                 >
                   <GoogleG />
-                  Login with Google
+                  {googleClientIdConfigured ? "Login with Google" : "Google Login Unavailable"}
                 </button>
-                <div className="absolute inset-0 opacity-0">
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={() => console.log("Login Failed")}
-                  />
-                </div>
+                {googleClientIdConfigured && (
+                  <div className="absolute inset-0 opacity-0">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={() => console.log("Login Failed")}
+                      useOneTap={false}
+                    />
+                  </div>
+                )}
               </div>
+              {!googleClientIdConfigured && (
+                <p className="mt-2 text-center text-[11px] text-red-600">
+                  Google login is not configured. Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` first.
+                </p>
+              )}
             </div>
 
 
@@ -181,6 +201,14 @@ export default function LuxbissLoginSplit() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LuxbissLoginSplit() {
+  return (
+    <Suspense fallback={<div className="min-h-screen w-full bg-white" />}>
+      <LuxbissLoginSplitContent />
+    </Suspense>
   );
 }
 

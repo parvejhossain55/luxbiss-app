@@ -31,6 +31,7 @@ type UpdateUserRequest struct {
 	// Basic
 	Name                string   `json:"name" validate:"omitempty,min=2,max=100"`
 	Email               string   `json:"email" validate:"omitempty,email"`
+	Password            *string  `json:"password" validate:"omitempty,min=8,max=128"`
 	Role                *string  `json:"role" validate:"omitempty,oneof=user admin"`
 	Status              *string  `json:"status" validate:"omitempty,oneof=active ignored suspend hold"`
 	ProfilePhoto        *string  `json:"profile_photo" validate:"omitempty"`

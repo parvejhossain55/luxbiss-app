@@ -36,17 +36,26 @@ import AuthProvider from "@/components/providers/AuthProvider";
 import { Toaster } from "react-hot-toast";
 
 export default function RootLayout({ children }) {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${plusJakartaSans.variable} ${inter.variable} antialiased font-sans`}
       >
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "luxbiss-client-id"}>
+        {googleClientId ? (
+          <GoogleOAuthProvider clientId={googleClientId}>
+            <AuthProvider>
+              <Toaster position="top-right" toastOptions={{ className: 'text-sm font-semibold' }} />
+              {children}
+            </AuthProvider>
+          </GoogleOAuthProvider>
+        ) : (
           <AuthProvider>
             <Toaster position="top-right" toastOptions={{ className: 'text-sm font-semibold' }} />
             {children}
           </AuthProvider>
-        </GoogleOAuthProvider>
+        )}
       </body>
     </html>
   );
