@@ -48,8 +48,8 @@ export default function UserSidebar({ open, onClose }) {
         <div className="flex h-full flex-col">
           {/* Header */}
           <div className="flex items-center gap-2 px-5 py-4 border-b">
-            <div className="h-9 w-9 rounded-xl bg-sky-500/15 flex items-center justify-center">
-              <div className="h-5 w-5 rounded-md bg-sky-500" />
+            <div className="h-9 w-9 flex items-center justify-center">
+              <img src="/Logo.svg" alt="Luxbiss Logo" className="h-full w-full object-contain" />
             </div>
 
             <div className="font-semibold text-lg">Luxbiss</div>

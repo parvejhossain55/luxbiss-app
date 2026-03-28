@@ -21,7 +21,6 @@ export function formatTableDate(value) {
   if (Number.isNaN(date.getTime())) return "";
 
   const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Dhaka",
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
