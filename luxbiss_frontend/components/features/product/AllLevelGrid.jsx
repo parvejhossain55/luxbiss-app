@@ -29,13 +29,11 @@ export default function AllLevelGrid({ levels = [], selectedLevel, onSelectLevel
                     const isUserLevel = levelId === currentId;
                     const isSelected = levelId === Number(selectedLevel);
 
-                    const nextLevelIdIfFinished = sortedLevels.find((_, i) => Number(sortedLevels[i - 1]?.id) === currentId)?.id;
-                    const isNextToUserLevel = levelId === Number(nextLevelIdIfFinished);
-
-                    // A level is UNLOCKED only if:
-                    // 1. It is the user's current level AND they haven't finished it yet
-                    // 2. It is the NEXT level AND they have finished the current one
-                    const isUnlocked = (isUserLevel && !currentStepCompleted) || (isNextToUserLevel && currentStepCompleted);
+                    // A level is UNLOCKED if:
+                    // 1. It is exactly the user's current level
+                    // 2. It is the level the user is currently viewing (selectedLevel) 
+                    //    BUT ONLY IF they have finished their current level.
+                    const isUnlocked = isUserLevel || (isSelected && currentStepCompleted);
                     const isLocked = !isUnlocked;
 
                     return (
@@ -58,7 +56,7 @@ export default function AllLevelGrid({ levels = [], selectedLevel, onSelectLevel
                             {isLocked ? (
                                 <Lock size={20} className="text-slate-200" />
                             ) : (
-                                <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-sky-500 animate-pulse" : "bg-sky-200"}`} />
+                                isSelected && <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
                             )}
 
                             {isUserLevel && !isLocked && (

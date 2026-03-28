@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import UserTopbar from "../UserNavbar/UserTopper";
 import UserSidebar from "../UserSidebar/UserSidebar";
 import FundDepositModal from "../../features/wallet/FundDepositModal";
+import FundWithdrawModal from "../../features/wallet/FundWithdrawModal";
 import { useModalStore } from "@/store/useModalStore";
 import { useTransactionStore } from "@/store/useTransactionStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -13,7 +14,7 @@ export default function UserDashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { isDepositModalOpen, closeDepositModal, depositMessage } = useModalStore();
+  const { isDepositModalOpen, closeDepositModal, depositMessage, isWithdrawModalOpen, closeWithdrawModal } = useModalStore();
   const { summary } = useTransactionStore();
   const { user, isAuthenticated, isLoading } = useAuthStore();
 
@@ -65,6 +66,11 @@ export default function UserDashboardLayout({ children }) {
         onClose={closeDepositModal}
         message={depositMessage}
         summary={summary}
+      />
+      <FundWithdrawModal
+        isOpen={isWithdrawModalOpen}
+        onClose={closeWithdrawModal}
+        availableBalance={user?.withdrawable_balance || 0}
       />
     </div>
   );

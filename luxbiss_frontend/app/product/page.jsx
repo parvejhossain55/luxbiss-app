@@ -22,21 +22,12 @@ export default function ProductPage() {
     fetchLevels({ per_page: 50 });
   }, [fetchLevels]);
 
-  // Automatically track user's current progress
+  // Set initial level from user progress ONLY ONCE on load
   useEffect(() => {
-    if (user?.level_id && levels.length > 0) {
-      if (user.current_step_completed) {
-        // If finished current level, try to show the next level automatically
-        const sorted = [...levels].sort((a, b) => a.id - b.id);
-        const currIdx = sorted.findIndex(l => l.id === user.level_id);
-        if (currIdx !== -1 && currIdx < sorted.length - 1) {
-          setSelectedLevel(sorted[currIdx + 1].id);
-          return;
-        }
-      }
+    if (user?.level_id && levels.length > 0 && selectedLevel === null) {
       setSelectedLevel(user.level_id);
     }
-  }, [user?.level_id, user?.current_step_completed, levels]);
+  }, [user?.level_id, levels]);
 
 
   useEffect(() => {

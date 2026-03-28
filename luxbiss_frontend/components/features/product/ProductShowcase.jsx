@@ -21,10 +21,11 @@ export default function ProductShowcase({
 }) {
     // Reset selected product index (though no longer used for thumbnails, good to keep for state consistency)
     const [setQuantity, setSetQuantity] = useState(1);
+    const [hasBeenDismissed, setHasBeenDismissed] = useState(false);
 
     const { investInProduct, isLoading: isInvesting } = useTransactionStore();
     const { user, fetchMe } = useAuthStore();
-    const { openDepositModal } = useModalStore();
+    const { openDepositModal, openWithdrawModal } = useModalStore();
     const router = useRouter();
 
     const baseMinQty = products[0]?.min_quantity || 1;
@@ -69,10 +70,10 @@ export default function ProductShowcase({
             if (res.success) {
                 toast.success("Investment successful!");
                 // Refresh user data to see updated balance and progress
-                const updatedUserRes = await fetchMe();
+                await fetchMe();
 
-                // If the updated user shows completion, show our special modal
-                if (updatedUserRes?.success && updatedUserRes.data?.current_step_completed) {
+                // Show Level Completion Modal immediately if this was the LAST step of the level
+                if (isLastStep) {
                     setShowCompletionModal(true);
                 }
             } else {
@@ -94,6 +95,13 @@ export default function ProductShowcase({
             setSetQuantity(1);
         }
     }, [selectedStep, products]);
+
+    // Show completion modal if the user visits a level they already finished
+    useEffect(() => {
+        if (user?.current_step_completed && isTierFinished && !showCompletionModal && !hasBeenDismissed) {
+            setShowCompletionModal(true);
+        }
+    }, [user?.current_step_completed, isTierFinished, showCompletionModal, hasBeenDismissed]);
 
     return (
         <section className="rounded-2xl border bg-white p-4 md:p-6 shadow-sm">
@@ -264,14 +272,18 @@ export default function ProductShowcase({
 
             <LevelCompletionModal
                 isOpen={showCompletionModal}
-                onClose={() => setShowCompletionModal(false)}
+                onClose={() => {
+                    setShowCompletionModal(false);
+                    setHasBeenDismissed(true);
+                }}
                 onContinue={() => {
                     setShowCompletionModal(false);
+                    setHasBeenDismissed(true);
                     handleNextLevel();
                 }}
                 onWithdraw={() => {
                     setShowCompletionModal(false);
-                    router.push("/wallet");
+                    openWithdrawModal();
                 }}
                 hasNextLevel={!!nextLevel}
             />
