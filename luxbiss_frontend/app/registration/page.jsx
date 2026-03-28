@@ -31,12 +31,10 @@ export default function LuxbissRegisterSplit() {
     });
 
     if (res.success) {
-      const userData = res.data?.user || res.data;
-      if (userData?.role === "admin") {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
+      toast.success(res.message || "OTP sent to your email");
+      // Save email for the verification page
+      sessionStorage.setItem("pendingRegistrationEmail", email);
+      router.push("/otp-verification?type=registration");
     }
   };
 
@@ -133,11 +131,7 @@ export default function LuxbissRegisterSplit() {
               <div className="h-px flex-1 bg-[#e9edf5]" />
             </div>
 
-            {/* Inputs */}
-            <form
-              onSubmit={handleSubmit}
-              className="mx-auto max-w-[520px] space-y-5"
-            >
+            <form onSubmit={handleSubmit} className="mx-auto max-w-[520px] space-y-5">
               <Field
                 label="Full Name"
                 placeholder="Enter your name"
@@ -201,10 +195,10 @@ export default function LuxbissRegisterSplit() {
               {/* Register button */}
               <button
                 type="submit"
-                disabled={!agree}
+                disabled={!agree || isLoading}
                 className={[
                   "mt-2 w-full rounded-lg py-3 text-[13px] font-semibold text-white transition",
-                  agree
+                  agree && !isLoading
                     ? "bg-[#1ea7d8] hover:bg-[#1795c2] active:scale-[0.99]"
                     : "cursor-not-allowed bg-[#8fd3ea]",
                 ].join(" ")}

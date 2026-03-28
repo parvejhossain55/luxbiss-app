@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, Loader2, Wallet as WalletIcon } from "lucide-react";
 import { useWalletStore } from "@/store/useWalletStore";
 import { getImageUrl } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 
 export default function AddWalletModal({ isOpen, onClose, initialValue, onSubmit }) {
     const { wallets, fetchWallets, isLoading, error } = useWalletStore();
@@ -84,7 +85,6 @@ export default function AddWalletModal({ isOpen, onClose, initialValue, onSubmit
                                         name="network"
                                         checked={isSelected(wallet)}
                                         onChange={() => handleSelect(wallet)}
-                                        disabled={!!initialValue?.currency}
                                         className="mt-1.5 h-4 w-4 accent-[#1FB0D8]"
                                     />
 
@@ -130,14 +130,19 @@ export default function AddWalletModal({ isOpen, onClose, initialValue, onSubmit
                             placeholder="Paste your wallet address here"
                             value={draft.withdrawalAddress || ""}
                             onChange={(e) => setDraft({ ...draft, withdrawalAddress: e.target.value })}
-                            disabled={!!initialValue?.withdrawalAddress}
                             className="w-full h-11 rounded-md border border-[#EEEEEE] bg-[#FAFAFA] px-4 text-xs text-[#424242] font-semibold outline-none focus:bg-white focus:border-[#1FB0D8] transition-all font-['Plus_Jakarta_Sans'] disabled:opacity-60 disabled:cursor-not-allowed"
                         />
                     </div>
 
                     <button
-                        onClick={() => onSubmit(draft)}
-                        disabled={isLoading || wallets.length === 0}
+                        onClick={() => {
+                            if (!draft.currency || !draft.withdrawalAddress) {
+                                toast.error("Please select a network and enter a withdrawal address");
+                                return;
+                            }
+                            onSubmit(draft);
+                        }}
+                        disabled={isLoading || wallets.length === 0 || !draft.currency || !draft.withdrawalAddress}
                         className="mt-6 w-full rounded-md bg-[#1FB0D8] py-3.5 text-sm font-bold text-white hover:opacity-90 transition-all shadow-md active:scale-[0.98] font-['Plus_Jakarta_Sans'] flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Submit

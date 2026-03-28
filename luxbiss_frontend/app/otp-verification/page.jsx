@@ -3,14 +3,29 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { authService } from "@/lib/auth";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useSearchParams } from "next/navigation";
 
-export default function LuxbissVerifyCodeSplit({
+import { Suspense } from "react";
+
+export default function LuxbissVerifyCodePage(props) {
+  return (
+    <Suspense fallback={<div className="min-h-screen grid place-items-center">Loading...</div>}>
+      <LuxbissVerifyCodeSplit {...props} />
+    </Suspense>
+  );
+}
+
+function LuxbissVerifyCodeSplit({
   onSubmit,
   length = 6,
   initialValue = "",
 }) {
   const router = useRouter();
+  const { confirmRegistration, clearError, isLoading, error: storeError } = useAuthStore();
+  const searchParams = useSearchParams();
+  const type = searchParams.get("type"); // "registration" or "forgot-password"
+
   const [digits, setDigits] = useState(() => {
     const arr = Array.from({ length }, () => "");
     const seed = String(initialValue || "").slice(0, length).split("");
@@ -18,8 +33,12 @@ export default function LuxbissVerifyCodeSplit({
     return arr;
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [localError, setLocalError] = useState("");
+
+  const error = localError || storeError;
+  const setError = setLocalError;
+  const setIsLoading = setIsVerifying;
 
   const inputsRef = useRef([]);
 
@@ -101,7 +120,10 @@ export default function LuxbissVerifyCodeSplit({
     setIsLoading(true);
     setError("");
 
-    const email = sessionStorage.getItem("resetPasswordEmail");
+    const registrationEmail = sessionStorage.getItem("pendingRegistrationEmail");
+    const resetEmail = sessionStorage.getItem("resetPasswordEmail");
+    const email = type === "registration" ? registrationEmail : resetEmail;
+
     if (!email) {
       setError("Email not found. Please start over.");
       setIsLoading(false);
@@ -109,12 +131,28 @@ export default function LuxbissVerifyCodeSplit({
     }
 
     try {
-      const res = await authService.verifyOtp(email, code);
-      if (res.success) {
-        sessionStorage.setItem("resetPasswordOtp", code);
-        router.push("/new-password");
+      if (type === "registration") {
+        const res = await confirmRegistration(email, code);
+        if (res.success) {
+          toast.success("Registration complete!");
+          sessionStorage.removeItem("pendingRegistrationEmail");
+
+          const userData = res.data?.user || res.data;
+          if (userData?.role === "admin") {
+            router.push("/admin/dashboard");
+          } else {
+            router.push("/dashboard");
+          }
+        }
       } else {
-        setError(res.message || "Invalid OTP");
+        const { authService } = await import("@/lib/auth");
+        const res = await authService.verifyOtp(email, code);
+        if (res.success) {
+          sessionStorage.setItem("resetPasswordOtp", code);
+          router.push("/new-password");
+        } else {
+          setError(res.message || "Invalid OTP");
+        }
       }
     } catch (err) {
       setError(err?.response?.data?.message || err.message || "An error occurred");
@@ -144,7 +182,7 @@ export default function LuxbissVerifyCodeSplit({
           <div className="w-full max-w-[420px]">
             <p className="mx-auto max-w-[360px] text-center text-[12px] leading-5 text-[#6b7280]">
               We&apos;ve sent a 6-digit verification code to your registered email
-              address. Please enter the code below to reset your password.
+              address. Please enter the code below to {type === "registration" ? "complete your registration" : "reset your password"}.
             </p>
 
             {/* Error Message */}

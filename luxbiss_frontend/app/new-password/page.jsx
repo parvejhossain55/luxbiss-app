@@ -35,7 +35,7 @@ export default function LuxbissForgotPasswordSplit() {
     }
 
     try {
-      const res = await authService.resetPassword(email, otp, newPassword);
+      const res = await authService.resetPassword(email, otp, newPassword, confirmPassword);
       if (res.success) {
         toast.success("Password reset successfully!");
         sessionStorage.removeItem("resetPasswordEmail");

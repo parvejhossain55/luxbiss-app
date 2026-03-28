@@ -123,7 +123,7 @@ export default function ProductShowcase({
                         {products.map((p) => (
                             <div
                                 key={p.id}
-                                className="group flex flex-col bg-white rounded-[32px] border border-slate-100 shadow-sm hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.08)] transition-all duration-500 hover:border-sky-100 overflow-hidden"
+                                className="group flex flex-col bg-white rounded-[32px] border border-slate-100 shadow-sm hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.08)] transition-all duration-500 hover:border-sky-100 overflow-hidden mx-auto w-full max-w-[420px]"
                             >
                                 {/* Product Image Section */}
                                 <div className="h-[280px] bg-slate-50 flex items-center justify-center relative overflow-hidden">

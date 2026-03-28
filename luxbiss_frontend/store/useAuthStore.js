@@ -37,11 +37,28 @@ export const useAuthStore = create(
                 try {
                     const res = await authService.register(userData);
                     if (res.success) {
+                        return res;
+                    }
+                    throw new Error(res.message || "Registration failed");
+                } catch (err) {
+                    const message = err.response?.data?.message || err.message || "An error occurred";
+                    set({ error: message });
+                    return { success: false, message };
+                } finally {
+                    set({ isLoading: false });
+                }
+            },
+
+            confirmRegistration: async (email, otp) => {
+                set({ isLoading: true, error: null });
+                try {
+                    const res = await authService.confirmRegistration(email, otp);
+                    if (res.success) {
                         set({ user: res.data?.user || null, isAuthenticated: true, error: null });
                         await get().fetchMe();
                         return res;
                     }
-                    throw new Error(res.message || "Registration failed");
+                    throw new Error(res.message || "Verification failed");
                 } catch (err) {
                     const message = err.response?.data?.message || err.message || "An error occurred";
                     set({ error: message });

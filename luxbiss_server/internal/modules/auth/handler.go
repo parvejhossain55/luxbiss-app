@@ -25,7 +25,7 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.Register(c.Request.Context(), &req)
+	msg, err := h.service.Register(c.Request.Context(), &req)
 	if err != nil {
 		if appErr, ok := common.IsAppError(err); ok {
 			c.JSON(appErr.StatusCode, common.Response{
@@ -36,6 +36,30 @@ func (h *Handler) Register(c *gin.Context) {
 			return
 		}
 		common.InternalError(c, "Failed to register")
+		return
+	}
+
+	common.OK(c, msg, nil)
+}
+
+func (h *Handler) ConfirmRegistration(c *gin.Context) {
+	var req VerifyOTPRequest
+	if errs := common.ValidateRequest(c, &req); errs != nil {
+		common.BadRequest(c, "Validation failed", errs)
+		return
+	}
+
+	resp, err := h.service.ConfirmRegistration(c.Request.Context(), &req)
+	if err != nil {
+		if appErr, ok := common.IsAppError(err); ok {
+			c.JSON(appErr.StatusCode, common.Response{
+				Success:   false,
+				Message:   appErr.Message,
+				RequestID: c.GetString("request_id"),
+			})
+			return
+		}
+		common.InternalError(c, "Failed to confirm registration")
 		return
 	}
 

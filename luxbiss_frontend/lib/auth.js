@@ -8,6 +8,12 @@ export const authService = {
   // 1. Register
   async register(userData) {
     const res = await api.post("/auth/register", userData);
+    return res.data;
+  },
+
+  // 1.5. Confirm Registration (OTP)
+  async confirmRegistration(email, otp) {
+    const res = await api.post("/auth/register/confirm", { email, otp });
     if (res.data.success) {
       this._handleAuthResponse(res.data.data);
     }
@@ -49,8 +55,13 @@ export const authService = {
     return res.data;
   },
 
-  async resetPassword(email, otp, newPassword) {
-    const res = await api.post("/auth/reset-password", { email, otp, password: newPassword });
+  async resetPassword(email, otp, newPassword, confirmPassword) {
+    const res = await api.post("/auth/reset-password", {
+      email,
+      otp,
+      password: newPassword,
+      confirm_password: confirmPassword
+    });
     return res.data;
   },
 
