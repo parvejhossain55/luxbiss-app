@@ -30,7 +30,7 @@ func (s *WalletSeeder) Seed(db *gorm.DB) error {
 		},
 		{
 			ID:            uuid.New().String(),
-			CoinName:      "Litecoin",
+			CoinName:      "LTC",
 			Network:       "Litecoin",
 			CoinLogoURL:   "",
 			WalletAddress: "ltc1qzvcjm2l2cw4q8pzk5t4trm5q9u4q4gq9cxyhcf",

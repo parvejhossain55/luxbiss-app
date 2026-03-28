@@ -12,11 +12,14 @@ type LevelSeeder struct{}
 func (s *LevelSeeder) Seed(db *gorm.DB) error {
 	for i := 1; i <= 20; i++ {
 		name := fmt.Sprintf("Level %d", i)
+		profitPercent := 0.5 + (float64(i-1) * 0.2) // Stats at 0.5% and grows
+
 		var existing product.Level
 		if err := db.Where("name = ?", name).First(&existing).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				level := product.Level{
-					Name: name,
+					Name:             name,
+					ProfitPercentage: profitPercent,
 				}
 				if err := db.Create(&level).Error; err != nil {
 					return err
@@ -24,6 +27,11 @@ func (s *LevelSeeder) Seed(db *gorm.DB) error {
 				existing = level
 			} else {
 				return err
+			}
+		} else {
+			// Update profit percentage if it changed or needs setup
+			if existing.ProfitPercentage != profitPercent {
+				db.Model(&existing).Update("profit_percentage", profitPercent)
 			}
 		}
 

@@ -48,6 +48,7 @@ func main() {
 	registry.Register(&seeder.LevelSeeder{})
 	registry.Register(&seeder.ProductSeeder{})
 	registry.Register(&seeder.WalletSeeder{})
+	registry.Register(&seeder.ManagerSeeder{})
 
 	if *truncate {
 		appLogger.Info("Truncating tables...")
