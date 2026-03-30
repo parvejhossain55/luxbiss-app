@@ -3,6 +3,27 @@ import { persist } from "zustand/middleware";
 import { authService } from "@/lib/auth";
 import { userService } from "@/lib/user";
 
+const extractErrorMessage = (err, defaultMsg = "An error occurred") => {
+    const data = err.response?.data;
+    if (!data) return err.message || defaultMsg;
+
+    let message = data.message || err.message || defaultMsg;
+
+    if (data.errors && Array.isArray(data.errors)) {
+        const fieldErrors = data.errors
+            .map(e => {
+                const field = e.field ? e.field.replace(/_/g, " ") : "";
+                return field ? `${field}: ${e.message}` : e.message;
+            })
+            .join(". ");
+        if (fieldErrors) {
+            message = `${message}. ${fieldErrors}`;
+        }
+    }
+
+    return message;
+};
+
 export const useAuthStore = create(
     persist(
         (set, get) => ({
@@ -24,7 +45,7 @@ export const useAuthStore = create(
                     }
                     throw new Error(res.message || "Login failed");
                 } catch (err) {
-                    const message = err.response?.data?.message || err.message || "An error occurred";
+                    const message = extractErrorMessage(err, "Login failed");
                     set({ error: message });
                     return { success: false, message };
                 } finally {
@@ -41,7 +62,7 @@ export const useAuthStore = create(
                     }
                     throw new Error(res.message || "Registration failed");
                 } catch (err) {
-                    const message = err.response?.data?.message || err.message || "An error occurred";
+                    const message = extractErrorMessage(err, "Registration failed");
                     set({ error: message });
                     return { success: false, message };
                 } finally {
@@ -60,7 +81,7 @@ export const useAuthStore = create(
                     }
                     throw new Error(res.message || "Verification failed");
                 } catch (err) {
-                    const message = err.response?.data?.message || err.message || "An error occurred";
+                    const message = extractErrorMessage(err, "Verification failed");
                     set({ error: message });
                     return { success: false, message };
                 } finally {
@@ -125,7 +146,7 @@ export const useAuthStore = create(
                     }
                     return res;
                 } catch (err) {
-                    const message = err.response?.data?.message || err.message || "Update failed";
+                    const message = extractErrorMessage(err, "Update failed");
                     set({ error: message });
                     return { success: false, message };
                 } finally {
