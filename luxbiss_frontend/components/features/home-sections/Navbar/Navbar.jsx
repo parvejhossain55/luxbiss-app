@@ -84,9 +84,9 @@ export default function Navbar() {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-50 via-sky-50 to-white" />
         <div className="pointer-events-none absolute -top-16 left-1/2 h-40 w-[520px] -translate-x-1/2 rounded-full bg-sky-100/60 blur-2xl" />
 
-        <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+        <nav className="relative mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-3 sm:px-6">
           {/* Logo */}
-          <a href="#home" className="group flex items-center gap-2">
+          <a href="/" className="group flex items-center gap-2">
             <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
               <Image
                 src="/Logo.svg"
@@ -145,11 +145,11 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
-              className="inline-flex items-center justify-center rounded-xl bg-black p-2 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 md:hidden"
+              className="inline-flex items-center justify-center rounded-xl bg-white p-2 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 md:hidden"
               aria-label="Toggle menu"
               aria-expanded={open}
             >
-              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {open ? <X className="h-5 w-5 text-slate-600" /> : <Menu className="h-5 w-5 text-slate-600" />}
             </button>
           </div>
         </nav>
@@ -158,17 +158,24 @@ export default function Navbar() {
         <div
           className={[
             "md:hidden",
-            open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-            "transition-opacity",
+            open ? "pointer-events-auto" : "pointer-events-none",
           ].join(" ")}
         >
           <button
             aria-label="Close menu"
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-40 bg-black/30"
+            className={[
+              "fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300",
+              open ? "opacity-100" : "opacity-0",
+            ].join(" ")}
           />
 
-          <div className="fixed left-1/2 top-20 z-50 w-[calc(100%-2rem)] -translate-x-1/2 rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-200">
+          <div
+            className={[
+              "fixed inset-x-4 top-20 z-50 origin-top transform rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200 transition-all duration-300",
+              open ? "scale-100 opacity-100" : "scale-95 opacity-0",
+            ].join(" ")}
+          >
             <div className="flex flex-col gap-2">
               {NAV_ITEMS.map((item) => {
                 const isActive = active === item.label;

@@ -37,13 +37,14 @@ import { Toaster } from "react-hot-toast";
 
 export default function RootLayout({ children }) {
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const isGoogleConfigured = googleClientId && googleClientId !== "undefined" && googleClientId !== "null";
 
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${plusJakartaSans.variable} ${inter.variable} antialiased font-sans`}
       >
-        {googleClientId ? (
+        {isGoogleConfigured ? (
           <GoogleOAuthProvider clientId={googleClientId}>
             <AuthProvider>
               <Toaster position="top-right" toastOptions={{ className: 'text-sm font-semibold' }} />

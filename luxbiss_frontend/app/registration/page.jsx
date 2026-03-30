@@ -1,14 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function LuxbissRegisterSplit() {
   const router = useRouter();
-  const { register, googleLogin, isLoading, error, clearError } = useAuthStore();
-  const googleClientIdConfigured = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+  const { register, isLoading, error, clearError } = useAuthStore();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -38,25 +36,6 @@ export default function LuxbissRegisterSplit() {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    if (!agree) {
-      toast.error("Please agree to the Terms & Privacy Policy");
-      return;
-    }
-
-    const token = credentialResponse?.credential;
-    if (!token) return;
-
-    const res = await googleLogin(token);
-    if (res.success) {
-      const userData = res.data?.user || res.data;
-      if (userData?.role === "admin") {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
-    }
-  };
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -92,7 +71,6 @@ export default function LuxbissRegisterSplit() {
                 <button onClick={clearError} className="ml-2 font-bold underline">✕</button>
               </div>
             )}
-
 
             {/* Divider */}
             <div className="mx-auto my-8 flex w-full max-w-[520px] items-center gap-4">
@@ -137,6 +115,9 @@ export default function LuxbissRegisterSplit() {
                     <EyeIcon />
                   </button>
                 </div>
+                <p className="mt-1 text-[11px] text-[#6b7280]">
+                  At least 8 characters, uppercase, lowercase, number and symbol.
+                </p>
               </div>
 
               {/* Checkbox */}
@@ -365,29 +346,6 @@ function EyeIcon() {
         d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
         stroke="currentColor"
         strokeWidth="2"
-      />
-    </svg>
-  );
-}
-
-function GoogleG() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
-      <path
-        fill="#FFC107"
-        d="M43.611 20.083H42V20H24v8h11.303C33.656 32.91 29.201 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.98 6.053 29.765 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.651-.389-3.917z"
-      />
-      <path
-        fill="#FF3D00"
-        d="M6.306 14.691l6.571 4.819C14.655 16.108 19.001 12 24 12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.98 6.053 29.765 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"
-      />
-      <path
-        fill="#4CAF50"
-        d="M24 44c5.087 0 9.877-1.953 13.409-5.127l-6.19-5.238C29.154 35.316 26.701 36 24 36c-5.18 0-9.62-3.066-11.285-7.452l-6.52 5.02C9.505 39.556 16.227 44 24 44z"
-      />
-      <path
-        fill="#1976D2"
-        d="M43.611 20.083H42V20H24v8h11.303c-.792 2.226-2.313 4.123-4.084 5.404l.003-.002 6.19 5.238C36.971 39.038 44 34 44 24c0-1.341-.138-2.651-.389-3.917z"
       />
     </svg>
   );

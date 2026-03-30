@@ -3,8 +3,10 @@ package auth
 import (
 	"context"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"math/big"
+	"net/http"
 	"strings"
 	"time"
 
@@ -240,17 +242,47 @@ func (s *Service) RefreshToken(ctx context.Context, refreshToken string) (*AuthR
 }
 
 func (s *Service) GoogleLogin(ctx context.Context, req *GoogleOAuthRequest) (*AuthResponse, error) {
+	// 1. Try validating as ID Token first
+	var emailClaim, nameClaim string
 	payload, err := idtoken.Validate(ctx, req.Token, s.oauthCfg.GoogleClientID)
-	if err != nil {
-		s.log.Errorw("Google token validation failed", "error", err)
-		return nil, common.ErrUnauthorized("Invalid Google token")
+
+	if err == nil {
+		// Valid ID Token
+		emailClaim, _ = payload.Claims["email"].(string)
+		nameClaim, _ = payload.Claims["name"].(string)
+	} else {
+		// 2. Fallback: Try as Access Token by calling Google UserInfo API
+		s.log.Infow("Token is not a valid ID Token, trying as Access Token", "error", err)
+
+		client := &http.Client{Timeout: 10 * time.Second}
+		reqURL := "https://www.googleapis.com/oauth2/v3/userinfo"
+		httpReq, _ := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
+		httpReq.Header.Set("Authorization", "Bearer "+req.Token)
+
+		resp, err := client.Do(httpReq)
+		if err != nil {
+			return nil, common.ErrUnauthorized("Failed to verify Google token")
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, common.ErrUnauthorized("Invalid Google token")
+		}
+
+		var googleUser struct {
+			Email string `json:"email"`
+			Name  string `json:"name"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&googleUser); err != nil {
+			return nil, common.ErrInternal(err)
+		}
+		emailClaim = googleUser.Email
+		nameClaim = googleUser.Name
 	}
 
-	emailClaim, ok := payload.Claims["email"].(string)
-	if !ok || emailClaim == "" {
+	if emailClaim == "" {
 		return nil, common.ErrUnauthorized("Google account has no email")
 	}
-	nameClaim, _ := payload.Claims["name"].(string)
 	if nameClaim == "" {
 		nameClaim = "Google User"
 	}

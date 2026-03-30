@@ -18,11 +18,12 @@ func SecurityHeaders() gin.HandlerFunc {
 		// Content Security Policy
 		c.Header("Content-Security-Policy",
 			"default-src 'self'; "+
-				"script-src 'self' 'unsafe-inline' 'unsafe-eval'; "+
-				"style-src 'self' 'unsafe-inline'; "+
+				"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com/gsi/client; "+
+				"style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; "+
 				"img-src 'self' data: https:; "+
-				"font-src 'self'; "+
-				"connect-src 'self' https://luxbiss.com https://www.luxbiss.com; "+
+				"font-src 'self' https://fonts.gstatic.com; "+
+				"connect-src 'self' https://accounts.google.com https://luxbiss.com https://www.luxbiss.com; "+
+				"frame-src 'self' https://accounts.google.com; "+
 				"frame-ancestors 'none'; "+
 				"base-uri 'self'; "+
 				"form-action 'self'",

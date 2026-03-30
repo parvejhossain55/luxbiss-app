@@ -4,6 +4,11 @@ WORKDIR /frontend
 COPY luxbiss_frontend/package*.json luxbiss_frontend/yarn.lock* ./
 RUN yarn install --frozen-lockfile || npm install
 COPY luxbiss_frontend .
+
+# Pass build-time variables for Next.js static export
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+
 RUN yarn build || npm run build
 
 # Stage 2: Build Backend

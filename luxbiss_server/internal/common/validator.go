@@ -53,6 +53,8 @@ func formatValidationError(e validator.FieldError) string {
 		return "must be a valid URL"
 	case "uuid":
 		return "must be a valid UUID"
+	case "secure_password":
+		return "must be at least 8 characters and include uppercase, lowercase, numbers, and symbols"
 	default:
 		return fmt.Sprintf("failed on '%s' validation", e.Tag())
 	}

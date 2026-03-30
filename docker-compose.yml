@@ -4,11 +4,15 @@ services:
       context: .
       dockerfile: Dockerfile
       target: ${APP_ENV:-prod}
+      args:
+        - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+        - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
     container_name: luxbiss-api
     ports:
-      - "127.0.0.1:8080:8080" # Exposed to local Nginx, hidden from public firewall
+      - "127.0.0.1:8080:8080"
     env_file:
       - luxbiss_server/.env
+      - luxbiss_frontend/.env
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
