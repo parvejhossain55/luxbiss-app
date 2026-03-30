@@ -9,6 +9,7 @@ import {
     TrendingUp, CreditCard, History
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useTransactionStore } from "@/store/useTransactionStore";
 import { useProductStore } from "@/store/useProductStore";
@@ -22,9 +23,28 @@ import { formatTableDate } from "@/lib/utils";
 export default function AdminUserEditPage() {
     const params = useParams();
     const router = useRouter();
-    // Handle both [id] and [[...id]] catch-all params
-    const userId = Array.isArray(params.id) ? params.id[0] : params.id;
 
+    // Extract ID from URL, handling both standard navigation and static shells
+    const [userId, setUserId] = React.useState(() => {
+        const id = Array.isArray(params.id) ? params.id[0] : params.id;
+        return id !== "user_shell" ? id : null;
+    });
+
+    React.useEffect(() => {
+        // Fallback for static export where params.id might be 'user_shell'
+        if ((!userId || userId === "user_shell") && typeof window !== "undefined") {
+            const parts = window.location.pathname.split("/").filter(Boolean);
+            const usersIndex = parts.indexOf("users");
+            if (usersIndex !== -1 && parts[usersIndex + 1]) {
+                const idFromUrl = parts[usersIndex + 1];
+                if (idFromUrl !== "user_shell") {
+                    setUserId(idFromUrl);
+                }
+            }
+        }
+    }, [params.id]);
+
+    const { user } = useAuthStore();
     const { fetchUser, updateUser, approveHoldBalance, isLoading: storeLoading } = useUserStore();
     const { fetchSummary } = useTransactionStore();
     const { levels, fetchLevels, fetchSteps } = useProductStore();
@@ -51,9 +71,18 @@ export default function AdminUserEditPage() {
     });
 
     useEffect(() => {
-        loadUser();
-        fetchLevels({ per_page: 50 });
-    }, [userId]);
+        // If not admin, redirect 
+        if (user && user.role !== "admin") {
+            router.push("/dashboard");
+        }
+    }, [user, router]);
+
+    useEffect(() => {
+        if (user && user.role === "admin" && userId && userId !== "user_shell") {
+            loadUser();
+            fetchLevels({ per_page: 50 });
+        }
+    }, [userId, user]);
 
     useEffect(() => {
         if (formData.level_id) {
@@ -95,7 +124,7 @@ export default function AdminUserEditPage() {
             });
         } else {
             toast.error(userRes.message || "Failed to load user");
-            router.push("/admin/users");
+            router.push("/admin/users/");
         }
         setIsLoading(false);
     };
@@ -177,7 +206,7 @@ export default function AdminUserEditPage() {
                 {/* Header Actions */}
                 <div className="flex items-center justify-between">
                     <button
-                        onClick={() => router.back()}
+                        onClick={() => router.push("/admin/users/")}
                         className="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 hover:bg-white hover:shadow-sm transition-all font-medium"
                     >
                         <ArrowLeft size={18} />

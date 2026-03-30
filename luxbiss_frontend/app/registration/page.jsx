@@ -93,42 +93,9 @@ export default function LuxbissRegisterSplit() {
               </div>
             )}
 
-            {/* Google button */}
-            <div className="mx-auto mt-7 w-full max-w-[380px]">
-              <div className="relative">
-                <button
-                  type="button"
-                  disabled={!googleClientIdConfigured}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#cfd6e6] bg-white py-2.5 text-[13px] font-medium text-[#111827] shadow-sm hover:bg-[#f7f9ff]"
-                >
-                  <GoogleG />
-                  {googleClientIdConfigured
-                    ? (isLoading ? "Connecting..." : "Register with Google")
-                    : "Google Signup Unavailable"}
-                </button>
-
-                {googleClientIdConfigured && (
-                  <div className="absolute inset-0 opacity-0">
-                    <GoogleLogin
-                      onSuccess={handleGoogleSuccess}
-                      onError={() => console.log("Google sign-in failed")}
-                      useOneTap={false}
-                    />
-                  </div>
-                )}
-              </div>
-              {!googleClientIdConfigured && (
-                <p className="mt-2 text-center text-[11px] text-red-600">
-                  Google signup is not configured. Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` first.
-                </p>
-              )}
-            </div>
 
             {/* Divider */}
             <div className="mx-auto my-8 flex w-full max-w-[520px] items-center gap-4">
-              <div className="h-px flex-1 bg-[#e9edf5]" />
-              <div className="text-[13px] text-[#9aa3b2]">or</div>
-              <div className="h-px flex-1 bg-[#e9edf5]" />
             </div>
 
             <form onSubmit={handleSubmit} className="mx-auto max-w-[520px] space-y-5">

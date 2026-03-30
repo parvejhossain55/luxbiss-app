@@ -82,24 +82,26 @@ function LuxbissLoginSplitContent() {
 
 
 
-            {/* Google */}
+            {/* Google Login Section */}
             <div className="mx-auto mt-6 w-full max-w-[300px]">
-              <div className="relative">
-                <button
-                  type="button"
-                  disabled={!googleClientIdConfigured}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#cfd6e6] bg-white py-2 text-[12px] font-medium text-[#111827] shadow-sm hover:bg-[#f7f9ff]"
-                >
-                  <GoogleG />
-                  {googleClientIdConfigured ? "Login with Google" : "Google Login Unavailable"}
-                </button>
-                {googleClientIdConfigured && (
-                  <div className="absolute inset-0 opacity-0">
+              <div className="relative flex min-h-[40px] items-center justify-center">
+                {googleClientIdConfigured ? (
+                  <div className="w-full transform transition-all active:scale-[0.98]">
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}
                       onError={() => console.log("Login Failed")}
                       useOneTap={false}
+                      theme="outline"
+                      size="large"
+                      width="300"
+                      shape="rectangular"
+                      logo_alignment="center"
                     />
+                  </div>
+                ) : (
+                  <div className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#cfd6e6] bg-slate-50 py-2 text-[12px] font-medium text-[#94a3b8]">
+                    <GoogleG />
+                    Google Login Unavailable
                   </div>
                 )}
               </div>

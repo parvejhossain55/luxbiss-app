@@ -38,7 +38,7 @@ const UserManagement = () => {
     const tabs = ["All User", "Active", "Ignored", "Suspended", "Hold"];
 
     const handleEdit = (user) => {
-        router.push(`/admin/users/${user.id}`);
+        router.push(`/admin/users/${user.id}/`);
     };
 
     const columns = [

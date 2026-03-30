@@ -109,7 +109,16 @@ func ServeFrontend(router *gin.Engine) {
 			return
 		}
 
-		// 5. Otherwise, serve index.html (SPA routing fallback)
+		// 5. Special case for dynamic routes with shells (Next.js static export)
+		if strings.HasPrefix(cleanPath, "admin/users/") {
+			// This matches /admin/users/[id]/
+			// Try to serve the pre-generated user shell
+			if serveHTML("admin/users/user_shell/index.html") {
+				return
+			}
+		}
+
+		// 6. Otherwise, serve index.html (SPA routing fallback)
 		if serveHTML("index.html") {
 			return
 		}
