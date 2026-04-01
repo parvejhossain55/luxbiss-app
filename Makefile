@@ -15,11 +15,11 @@ DB_URL      ?= postgres://postgres:postgres@localhost:5432/luxbiss?sslmode=disab
 
 ## dev: Run with hot-reload (Air)
 dev:
-	@cd $(SERVER_DIR) && air -c .air.toml
+	@cd $(SERVER_DIR) && DB_HOST=localhost DB_PORT=5432 REDIS_HOST=localhost REDIS_PORT=6379 air -c .air.toml
 
 ## run: Run without hot-reload
 run:
-	@cd $(SERVER_DIR) && go run $(MAIN_PATH)
+	@cd $(SERVER_DIR) && DB_HOST=localhost DB_PORT=5432 REDIS_HOST=localhost REDIS_PORT=6379 go run $(MAIN_PATH)
 
 ## build: Compile production binary
 build:

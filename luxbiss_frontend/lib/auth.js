@@ -11,6 +11,11 @@ export const authService = {
     return res.data;
   },
 
+  async resendRegistrationOtp(email) {
+    const res = await api.post("/auth/register/resend", { email });
+    return res.data;
+  },
+
   // 1.5. Confirm Registration (OTP)
   async confirmRegistration(email, otp) {
     const res = await api.post("/auth/register/confirm", { email, otp });

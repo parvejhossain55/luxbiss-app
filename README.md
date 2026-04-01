@@ -239,6 +239,57 @@ TELEGRAM_CHAT_ID=
 TELEGRAM_PROXY=
 ```
 
+## CI/CD Pipeline
+
+GitHub Actions is configured under [`.github/workflows/ci.yml`](/home/parvej/Client_Project/.github/workflows/ci.yml) and [`.github/workflows/cd.yml`](/home/parvej/Client_Project/.github/workflows/cd.yml).
+
+### CI
+
+`CI` runs on every pull request and on pushes to `main` and `develop`. It performs:
+
+- frontend dependency install, lint, and production build
+- backend module verification, `go test`, and API build
+- full Docker image build validation against the root `Dockerfile`
+
+### CD
+
+`CD` runs on pushes to `main` and on manual dispatch. It:
+
+- builds the production container
+- pushes the image to GitHub Container Registry as `ghcr.io/<owner>/<repo>:latest`
+- also tags each release with the commit SHA
+- optionally deploys to a Linux host over SSH when deploy secrets are configured
+
+### Required GitHub Secrets
+
+For image publishing:
+
+- `NEXT_PUBLIC_API_BASE_URL`
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+
+For remote deployment:
+
+- `DEPLOY_HOST`
+- `DEPLOY_PORT` (optional, defaults to `22`)
+- `DEPLOY_USER`
+- `DEPLOY_SSH_KEY`
+- `GHCR_DEPLOY_USER`
+- `GHCR_DEPLOY_TOKEN`
+- `ENV_FILE_PATH` (optional, defaults to `/opt/luxbiss/.env`)
+- `UPLOADS_PATH` (optional, defaults to `/opt/luxbiss/uploads`)
+- `APP_PORT` (optional, defaults to `8080`)
+- `CONTAINER_NAME` (optional, defaults to `luxbiss-api`)
+
+### Remote Host Expectations
+
+The SSH deployment step assumes the target server already has:
+
+- Docker installed and running
+- a runtime env file present at `ENV_FILE_PATH`
+- any required backing services such as PostgreSQL and Redis reachable from the container
+
+The workflow replaces the running app container with the newest `latest` image and mounts uploads from `UPLOADS_PATH` into `/app/public/uploads`.
+
 Important backend notes:
 
 - `JWT_SECRET` is required and must be at least 32 characters.

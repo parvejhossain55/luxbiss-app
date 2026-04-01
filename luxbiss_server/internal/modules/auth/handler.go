@@ -42,6 +42,30 @@ func (h *Handler) Register(c *gin.Context) {
 	common.OK(c, msg, nil)
 }
 
+func (h *Handler) ResendRegistrationOTP(c *gin.Context) {
+	var req ResendRegistrationOTPRequest
+	if errs := common.ValidateRequest(c, &req); errs != nil {
+		common.BadRequest(c, "Validation failed", errs)
+		return
+	}
+
+	err := h.service.ResendRegistrationOTP(c.Request.Context(), req.Email)
+	if err != nil {
+		if appErr, ok := common.IsAppError(err); ok {
+			c.JSON(appErr.StatusCode, common.Response{
+				Success:   false,
+				Message:   appErr.Message,
+				RequestID: c.GetString("request_id"),
+			})
+			return
+		}
+		common.InternalError(c, "Failed to resend registration OTP")
+		return
+	}
+
+	common.OK(c, "New code sent successfully to your email", nil)
+}
+
 func (h *Handler) ConfirmRegistration(c *gin.Context) {
 	var req VerifyOTPRequest
 	if errs := common.ValidateRequest(c, &req); errs != nil {

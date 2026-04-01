@@ -245,10 +245,28 @@ function LuxbissVerifyCodeSplit({
               Didn't receive the code?{" "}
               <button
                 type="button"
-                onClick={() => {
-                  // Add resend logic here
-                  console.log("Resend code");
-                  toast.success("New code sent!");
+                onClick={async () => {
+                  const email = type === "registration"
+                    ? sessionStorage.getItem("pendingRegistrationEmail")
+                    : sessionStorage.getItem("resetPasswordEmail");
+
+                  if (!email) {
+                    toast.error("Email not found. Please start over.");
+                    return;
+                  }
+
+                  try {
+                    const { authService } = await import("@/lib/auth");
+                    if (type === "registration") {
+                      await authService.resendRegistrationOtp(email);
+                      toast.success("New registration code sent!");
+                    } else {
+                      await authService.forgotPassword(email);
+                      toast.success("New reset code sent to your email!");
+                    }
+                  } catch (err) {
+                    toast.error(err?.response?.data?.message || err.message || "Failed to resend code");
+                  }
                 }}
                 className="font-semibold text-[#1ea7d8] underline hover:no-underline"
               >

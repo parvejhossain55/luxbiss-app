@@ -15,6 +15,7 @@ func RegisterRoutes(rg *gin.RouterGroup, handler *Handler, rdb *redis.Client) {
 	auth.Use(middleware.RateLimit(rdb, 10, 1*time.Minute))
 	{
 		auth.POST("/register", handler.Register)
+		auth.POST("/register/resend", handler.ResendRegistrationOTP)
 		auth.POST("/register/confirm", handler.ConfirmRegistration)
 		auth.POST("/login", handler.Login)
 		auth.POST("/refresh", handler.RefreshToken)

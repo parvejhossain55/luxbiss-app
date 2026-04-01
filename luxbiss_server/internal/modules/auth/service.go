@@ -162,6 +162,42 @@ func (s *Service) ConfirmRegistration(ctx context.Context, req *VerifyOTPRequest
 	}, nil
 }
 
+func (s *Service) ResendRegistrationOTP(ctx context.Context, email string) error {
+	email = strings.ToLower(email)
+	otpKey := fmt.Sprintf("reg_otp:%s", email)
+	dataKey := fmt.Sprintf("reg_data:%s", email)
+
+	// 1. Check if registration data exists
+	exists, err := s.rdb.Exists(ctx, dataKey).Result()
+	if err != nil {
+		return common.ErrInternal(err)
+	}
+	if exists == 0 {
+		return common.ErrBadRequest("Registration session expired or does not exist. Please register again.")
+	}
+
+	// 2. Generate and store new OTP
+	otp := generateOTP(6)
+	err = s.rdb.Set(ctx, otpKey, otp, 15*time.Minute).Err()
+	if err != nil {
+		return common.ErrInternal(err)
+	}
+
+	// 3. Send Email
+	go func() {
+		subject := "Verify Your Registration (New Code)"
+		body := fmt.Sprintf("<h1>OTP: %s</h1><p>Use this code to complete your registration. It expires in 15 minutes.</p>", otp)
+		err := s.emailSender.SendEmail([]string{email}, subject, body)
+		if err != nil {
+			s.log.Errorw("Failed to resend registration OTP email", "error", err, "email", email)
+		} else {
+			s.log.Infow("Registration OTP email resent successfully", "email", email)
+		}
+	}()
+
+	return nil
+}
+
 func (s *Service) Login(ctx context.Context, req *LoginRequest) (*AuthResponse, error) {
 	existingUser, err := s.userService.GetByEmail(ctx, req.Email)
 	if err != nil {
