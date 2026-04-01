@@ -1,7 +1,6 @@
 package seeder
 
 import (
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/parvej/luxbiss_server/internal/modules/manager"
@@ -32,7 +31,6 @@ func (s *ManagerSeeder) Seed(db *gorm.DB) error {
 				if err := db.Create(&m).Error; err != nil {
 					return err
 				}
-				fmt.Printf("Seeded manager: %s\n", m.Name)
 			} else {
 				return err
 			}

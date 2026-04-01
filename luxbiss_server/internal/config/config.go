@@ -85,6 +85,7 @@ type SMTPConfig struct {
 	Username string
 	Password string
 	From     string
+	FromName string
 }
 
 type OAuthConfig struct {
@@ -181,6 +182,7 @@ func Load() (*Config, error) {
 			Username: viper.GetString("SMTP_USERNAME"),
 			Password: viper.GetString("SMTP_PASSWORD"),
 			From:     viper.GetString("SMTP_FROM"),
+			FromName: viper.GetString("SMTP_FROM_NAME"),
 		},
 		OAuth: OAuthConfig{
 			GoogleClientID:     viper.GetString("GOOGLE_CLIENT_ID"),
@@ -267,6 +269,7 @@ func setDefaults() {
 	viper.SetDefault("SMTP_USERNAME", "")
 	viper.SetDefault("SMTP_PASSWORD", "")
 	viper.SetDefault("SMTP_FROM", "noreply@luxbiss.com")
+	viper.SetDefault("SMTP_FROM_NAME", "Luxbiss")
 
 	viper.SetDefault("GOOGLE_CLIENT_ID", "")
 	viper.SetDefault("GOOGLE_CLIENT_SECRET", "")

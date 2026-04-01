@@ -220,6 +220,7 @@ func registerRoutes(
 		Username: cfg.SMTP.Username,
 		Password: cfg.SMTP.Password,
 		From:     cfg.SMTP.From,
+		FromName: cfg.SMTP.FromName,
 	})
 
 	authService := auth.NewService(userService, jwtManager, rdb, emailSender, &cfg.OAuth, appLogger)
