@@ -56,14 +56,13 @@ export default function HeroSection() {
           </div>
 
           {/* Right visual */}
-          <div className="relative">
+          {/* <div className="relative">
             <div className="mx-auto w-full max-w-2xl">
-              {/* Optional glass frame like screenshot */}
               <div className="rounded-3xl bg-white/50 p-2 shadow-xl ring-1 ring-slate-200 backdrop-blur">
 
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

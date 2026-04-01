@@ -14,13 +14,6 @@ export default function FundWithdrawModal({ isOpen, onClose, availableBalance })
     const [isCheckingProgress, setIsCheckingProgress] = useState(true);
 
     useEffect(() => {
-        if (!isOpen) {
-            setAmount("");
-            setDidSubmit(false);
-            clearError();
-            return;
-        }
-
         const checkProgress = async () => {
             if (user?.level_id) {
                 setIsCheckingProgress(true);

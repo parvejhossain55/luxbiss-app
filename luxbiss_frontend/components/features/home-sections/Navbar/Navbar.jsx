@@ -86,7 +86,7 @@ export default function Navbar() {
 
         <nav className="relative mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-3 sm:px-6">
           {/* Logo */}
-          <a href="/" className="group flex items-center gap-2">
+          <Link href="/" className="group flex items-center gap-2">
             <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
               <Image
                 src="/Logo.svg"
@@ -101,7 +101,7 @@ export default function Navbar() {
             <span className="text-lg font-extrabold tracking-wide text-sky-600">
               LUX <span className="text-sky-500">BISS</span>
             </span>
-          </a>
+          </Link>
 
           {/* Desktop links */}
           <div className="hidden items-center gap-7 md:flex">

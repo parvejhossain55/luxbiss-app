@@ -242,7 +242,7 @@ function LuxbissVerifyCodeSplit({
             </form>
 
             <p className="mt-6 text-center text-[12px] text-[#6b7280]">
-              Didn't receive the code?{" "}
+              Didn&apos;t receive the code?{" "}
               <button
                 type="button"
                 onClick={async () => {

@@ -53,7 +53,7 @@ export default function StartInvestingCTA() {
               </div>
 
               <p className="mt-3 text-[12px] text-slate-600">
-                Don't miss out — Start investing in wholesale products now!
+                Don&apos;t miss out - Start investing in wholesale products now!
               </p>
             </div>
 

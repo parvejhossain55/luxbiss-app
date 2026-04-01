@@ -13,6 +13,7 @@ export default function ProductPage() {
 
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [selectedStep, setSelectedStep] = useState(null);
+  const activeSelectedLevel = selectedLevel ?? user?.level_id ?? null;
 
   useEffect(() => {
     fetchMe();
@@ -22,21 +23,13 @@ export default function ProductPage() {
     fetchLevels({ per_page: 50 });
   }, [fetchLevels]);
 
-  // Set initial level from user progress ONLY ONCE on load
   useEffect(() => {
-    if (user?.level_id && levels.length > 0 && selectedLevel === null) {
-      setSelectedLevel(user.level_id);
-    }
-  }, [user?.level_id, levels]);
-
-
-  useEffect(() => {
-    if (selectedLevel) {
-      fetchSteps(selectedLevel, { per_page: 50 }).then((res) => {
+    if (activeSelectedLevel) {
+      fetchSteps(activeSelectedLevel, { per_page: 50 }).then((res) => {
         if (res?.success && res.data?.length > 0) {
           // If viewing user's own level, use their step ONLY if it's valid for this level's content
           const userStepInLevel = res.data.find(s => s.id === user?.step_id);
-          if (user?.level_id === selectedLevel && userStepInLevel) {
+          if (user?.level_id === activeSelectedLevel && userStepInLevel) {
             setSelectedStep(user.step_id);
           } else {
             // Default to first step of whatever level is being viewed (or if user's state is out of sync)
@@ -47,24 +40,25 @@ export default function ProductPage() {
         }
       });
     }
-  }, [selectedLevel, user, fetchSteps]);
+  }, [activeSelectedLevel, fetchSteps, user]);
 
   useEffect(() => {
-    if (selectedLevel && selectedStep) {
-      fetchProducts({ level_id: selectedLevel, step_id: selectedStep, per_page: 50 });
+    if (activeSelectedLevel && selectedStep) {
+      fetchProducts({ level_id: activeSelectedLevel, step_id: selectedStep, per_page: 50 });
     }
-  }, [selectedLevel, selectedStep, fetchProducts]);
+  }, [activeSelectedLevel, fetchProducts, selectedStep]);
 
-  const activeLevel = levels.find((l) => l.id === selectedLevel);
+  const activeLevel = levels.find((l) => l.id === activeSelectedLevel);
   const totalSteps = steps.length;
   const currentStepIndex = steps.findIndex(s => s.id === selectedStep);
+  const showcaseKey = `${activeSelectedLevel ?? "none"}-${selectedStep ?? "none"}-${products[0]?.id ?? "empty"}`;
 
   // Calculate progress: increments as you go, hits 100% if current step is completed.
   const getProgress = () => {
-    if (!user || !selectedLevel || totalSteps === 0) return 0;
+    if (!user || !activeSelectedLevel || totalSteps === 0) return 0;
 
     const userLevelIdx = levels.findIndex(l => l.id === user.level_id);
-    const selectedLevelIdx = levels.findIndex(l => l.id === selectedLevel);
+    const selectedLevelIdx = levels.findIndex(l => l.id === activeSelectedLevel);
 
     if (selectedLevelIdx < userLevelIdx) return 100;
     if (selectedLevelIdx > userLevelIdx) return 0;
@@ -92,6 +86,7 @@ export default function ProductPage() {
         />
 
         <ProductShowcase
+          key={showcaseKey}
           products={products}
           currentLevel={activeLevel}
           allLevels={levels}
@@ -105,7 +100,7 @@ export default function ProductPage() {
 
         <AllLevelGrid
           levels={levels}
-          selectedLevel={selectedLevel}
+          selectedLevel={activeSelectedLevel}
           onSelectLevel={(id) => {
             setSelectedLevel(id);
           }}

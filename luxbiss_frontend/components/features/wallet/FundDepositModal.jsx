@@ -16,22 +16,9 @@ export default function FundDepositModal({ isOpen, onClose, summary, message }) 
     const [timeLeft, setTimeLeft] = useState(1200); // 20 minutes in seconds
 
     useEffect(() => {
-        if (isOpen) {
-            fetchWallets();
-            setStep(1);
-            setAmount("");
-            setCopied(false);
-            setTimeLeft(1200);
-        }
+        fetchWallets();
         clearError();
-    }, [isOpen, clearError, fetchWallets]);
-
-    // Set default selection when wallets load
-    useEffect(() => {
-        if (wallets.length > 0 && !selectedNetworkId) {
-            setSelectedNetworkId(wallets[0].id);
-        }
-    }, [wallets, selectedNetworkId]);
+    }, [clearError, fetchWallets]);
 
     // Countdown logic
     useEffect(() => {
@@ -75,7 +62,10 @@ export default function FundDepositModal({ isOpen, onClose, summary, message }) 
         };
     });
 
-    const selectedNetwork = networks.find(n => n.id === selectedNetworkId) || networks[0];
+    const resolvedSelectedNetworkId = networks.some((network) => network.id === selectedNetworkId)
+        ? selectedNetworkId
+        : networks[0]?.id;
+    const selectedNetwork = networks.find(n => n.id === resolvedSelectedNetworkId) || networks[0];
 
     const handleCopy = () => {
         if (!selectedNetwork?.address) return;

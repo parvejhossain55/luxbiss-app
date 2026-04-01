@@ -64,21 +64,12 @@ export default function RedeemGiftCardModal({ isOpen, onClose }) {
     const [giftCard, setGiftCard] = useState({ code: "", amount: 0, expired_at: "" });
     const [successMessage, setSuccessMessage] = useState("");
 
-    /* ── Reset all state when modal closes ── */
-    useEffect(() => {
-        if (!isOpen) {
-            setGiftCard({ code: "", amount: 0, expired_at: "" });
-            setSuccessMessage("");
-            reset();
-        }
-    }, [isOpen, reset]);
-
     /* ── Re-verify whenever the code reaches full length (16 chars raw) ── */
     const rawLength = giftCard.code.replace(/-/g, "").length;
     const isFullCode = rawLength === 16;
 
     const handleCodeChange = useCallback(
-        (e) => {
+        async (e) => {
             const formatted = formatCode(e.target.value);
             setGiftCard(prev => ({ ...prev, code: formatted }));
             // Clear previous verified state whenever user edits the code
@@ -86,21 +77,14 @@ export default function RedeemGiftCardModal({ isOpen, onClose }) {
                 reset();
                 setSuccessMessage("");
             }
+
+            if (formatted.replace(/-/g, "").length === 16 && !isVerifying) {
+                setSuccessMessage("");
+                await verifyGiftCard(formatted);
+            }
         },
-        [verifiedCard, verifyError, reset]
+        [isVerifying, reset, verifiedCard, verifyError, verifyGiftCard]
     );
-
-    const handleVerify = useCallback(async () => {
-        if (!isFullCode || isVerifying) return;
-        setSuccessMessage("");
-        await verifyGiftCard(giftCard.code);
-    }, [giftCard.code, isFullCode, isVerifying, verifyGiftCard]);
-
-    useEffect(() => {
-        if (isFullCode && !verifiedCard && !verifyError && !isVerifying) {
-            handleVerify();
-        }
-    }, [isFullCode]);
 
     const handleRedeem = useCallback(async () => {
         if (!verifiedCard || isApplying) return;
@@ -111,9 +95,21 @@ export default function RedeemGiftCardModal({ isOpen, onClose }) {
             // Refresh real-time data: wallet balance, summary and transactions
             Promise.all([fetchSummary(), fetchMe(), fetchTransactions({ per_page: 10 })]);
             // Close modal after short delay so user reads success message
-            setTimeout(onClose, 1800);
+            setTimeout(() => {
+                setGiftCard({ code: "", amount: 0, expired_at: "" });
+                setSuccessMessage("");
+                reset();
+                onClose();
+            }, 1800);
         }
-    }, [verifiedCard, isApplying, applyGiftCard, giftCard.code, fetchSummary, fetchMe, fetchTransactions, onClose]);
+    }, [verifiedCard, isApplying, applyGiftCard, giftCard.code, fetchSummary, fetchMe, fetchTransactions, onClose, reset]);
+
+    const handleClose = useCallback(() => {
+        setGiftCard({ code: "", amount: 0, expired_at: "" });
+        setSuccessMessage("");
+        reset();
+        onClose();
+    }, [onClose, reset]);
 
     if (!isOpen) return null;
 
@@ -124,7 +120,7 @@ export default function RedeemGiftCardModal({ isOpen, onClose }) {
     return (
         <div
             className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm overflow-hidden"
-            onClick={(e) => e.target === e.currentTarget && onClose()}
+            onClick={(e) => e.target === e.currentTarget && handleClose()}
         >
             <div
                 role="dialog"
@@ -146,7 +142,7 @@ export default function RedeemGiftCardModal({ isOpen, onClose }) {
                         </h2>
                     </div>
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         aria-label="Close modal"
                         className="text-[#667085] hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
                     >

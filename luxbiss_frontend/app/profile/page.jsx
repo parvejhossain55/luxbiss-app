@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
 import {
     Pencil,
@@ -18,65 +18,35 @@ export default function ProfilePage() {
 
     const { user, updateUser, fetchMe, isLoading } = useAuthStore();
 
-    const [profile, setProfile] = useState({
-        header: {
-            name: "",
-            email: "",
-            status: "Active",
-            avatarUrl: "",
-        },
-        personal: {
-            fullName: "",
-            dob: "",
-            gender: "",
-            email: "",
-            phone: "",
-            address: "",
-            country: "",
-            profile_photo: "",
-        },
-        wallet: {
-            networkKey: "",
-            paymentMethod: "Cryptocurrency",
-            currency: "",
-            network: "",
-            withdrawalAddress: "",
-        },
-    });
-
     useEffect(() => {
         fetchMe();
     }, [fetchMe]);
 
-    useEffect(() => {
-        if (user) {
-            setProfile({
-                header: {
-                    name: user.name || "",
-                    email: user.email || "",
-                    status: user.status || "Active",
-                    avatarUrl: user.profile_photo || "",
-                },
-                personal: {
-                    fullName: user.name || "",
-                    dob: user.date_of_birth || "",
-                    gender: user.gender || "",
-                    email: user.email || "",
-                    phone: user.phone || "",
-                    address: user.address || "",
-                    country: user.country || "",
-                    profile_photo: user.profile_photo || "",
-                },
-                wallet: {
-                    networkKey: "", // Map if possible
-                    paymentMethod: user.payment_method || "Cryptocurrency",
-                    currency: user.payment_currency || "",
-                    network: user.payment_network || "",
-                    withdrawalAddress: user.withdrawal_address || "",
-                },
-            });
-        }
-    }, [user]);
+    const profile = useMemo(() => ({
+        header: {
+            name: user?.name || "",
+            email: user?.email || "",
+            status: user?.status || "Active",
+            avatarUrl: user?.profile_photo || "",
+        },
+        personal: {
+            fullName: user?.name || "",
+            dob: user?.date_of_birth || "",
+            gender: user?.gender || "",
+            email: user?.email || "",
+            phone: user?.phone || "",
+            address: user?.address || "",
+            country: user?.country || "",
+            profile_photo: user?.profile_photo || "",
+        },
+        wallet: {
+            networkKey: "",
+            paymentMethod: user?.payment_method || "Cryptocurrency",
+            currency: user?.payment_currency || "",
+            network: user?.payment_network || "",
+            withdrawalAddress: user?.withdrawal_address || "",
+        },
+    }), [user]);
 
     const [personalOpen, setPersonalOpen] = useState(false);
     const [walletOpen, setWalletOpen] = useState(false);
@@ -226,25 +196,31 @@ export default function ProfilePage() {
             </div>
 
             {/* Modals */}
-            <EditProfileModal
-                isOpen={personalOpen}
-                initialValue={profile.personal}
-                onClose={() => setPersonalOpen(false)}
-                onSubmit={handlePersonalSubmit}
-            />
+            {personalOpen ? (
+                <EditProfileModal
+                    isOpen={personalOpen}
+                    initialValue={profile.personal}
+                    onClose={() => setPersonalOpen(false)}
+                    onSubmit={handlePersonalSubmit}
+                />
+            ) : null}
 
-            <AddWalletModal
-                isOpen={walletOpen}
-                initialValue={profile.wallet}
-                onClose={() => setWalletOpen(false)}
-                onSubmit={handleWalletSubmit}
-            />
+            {walletOpen ? (
+                <AddWalletModal
+                    isOpen={walletOpen}
+                    initialValue={profile.wallet}
+                    onClose={() => setWalletOpen(false)}
+                    onSubmit={handleWalletSubmit}
+                />
+            ) : null}
 
-            <ChangePasswordModal
-                isOpen={passwordOpen}
-                registeredEmail={profile.header.email}
-                onClose={() => setPasswordOpen(false)}
-            />
+            {passwordOpen ? (
+                <ChangePasswordModal
+                    isOpen={passwordOpen}
+                    registeredEmail={profile.header.email}
+                    onClose={() => setPasswordOpen(false)}
+                />
+            ) : null}
         </UserDashboardLayout>
     );
 }

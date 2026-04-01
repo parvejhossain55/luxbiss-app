@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AdminDashboardLayout from "@/components/layout/AdminDashboardLayout/AdminDashboardLayout";
 import {
@@ -42,7 +42,7 @@ export default function AdminUserEditPage() {
                 }
             }
         }
-    }, [params.id]);
+    }, [params.id, userId]);
 
     const { user } = useAuthStore();
     const { fetchUser, updateUser, approveHoldBalance, isLoading: storeLoading } = useUserStore();
@@ -52,7 +52,7 @@ export default function AdminUserEditPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isTxModalOpen, setIsTxModalOpen] = useState(false);
-    const [availableSteps, setAvailableSteps] = useState([]);
+    const [stepsByLevel, setStepsByLevel] = useState({});
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -77,24 +77,7 @@ export default function AdminUserEditPage() {
         }
     }, [user, router]);
 
-    useEffect(() => {
-        if (user && user.role === "admin" && userId && userId !== "user_shell") {
-            loadUser();
-            fetchLevels({ per_page: 50 });
-        }
-    }, [userId, user]);
-
-    useEffect(() => {
-        if (formData.level_id) {
-            fetchSteps(formData.level_id, { per_page: 50 }).then(res => {
-                if (res.success) {
-                    setAvailableSteps(res.data);
-                }
-            });
-        }
-    }, [formData.level_id, fetchSteps]);
-
-    const loadUser = async () => {
+    const loadUser = useCallback(async () => {
         setIsLoading(true);
         const [userRes, summaryRes] = await Promise.all([
             fetchUser(userId),
@@ -127,7 +110,33 @@ export default function AdminUserEditPage() {
             router.push("/admin/users/");
         }
         setIsLoading(false);
-    };
+    }, [fetchSummary, fetchUser, router, userId]);
+
+    useEffect(() => {
+        if (user && user.role === "admin" && userId && userId !== "user_shell") {
+            queueMicrotask(() => {
+                void loadUser();
+                void fetchLevels({ per_page: 50 });
+            });
+        }
+    }, [fetchLevels, loadUser, user, userId]);
+
+    useEffect(() => {
+        if (!formData.level_id || stepsByLevel[formData.level_id]) {
+            return;
+        }
+
+        fetchSteps(formData.level_id, { per_page: 50 }).then(res => {
+            if (res.success) {
+                setStepsByLevel((prev) => ({
+                    ...prev,
+                    [formData.level_id]: res.data,
+                }));
+            }
+        });
+    }, [fetchSteps, formData.level_id, stepsByLevel]);
+
+    const availableSteps = formData.level_id ? (stepsByLevel[formData.level_id] || []) : [];
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -507,5 +516,3 @@ function MiniStatCard({ title, value, icon }) {
         </div>
     );
 }
-
-

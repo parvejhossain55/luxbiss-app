@@ -9,10 +9,6 @@ export default function EditProfileModal({ isOpen, onClose, initialValue, onSubm
     const [draft, setDraft] = useState(initialValue || {});
     const [isUploading, setIsUploading] = useState(false);
 
-    useEffect(() => {
-        if (isOpen) setDraft(initialValue || {});
-    }, [isOpen, initialValue]);
-
     const handleImageUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -267,4 +263,3 @@ function Input({ className = "", ...props }) {
         />
     );
 }
-

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import Image from "next/image";
 import { getImageUrl } from "@/lib/utils";
 import { Lock, Loader2 } from "lucide-react";
 import { useTransactionStore } from "@/store/useTransactionStore";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useRouter } from "next/navigation";
 import { useModalStore } from "@/store/useModalStore";
 import { toast } from "react-hot-toast";
 import LevelCompletionModal from "./LevelCompletionModal";
@@ -20,13 +20,12 @@ export default function ProductShowcase({
     userStepId
 }) {
     // Reset selected product index (though no longer used for thumbnails, good to keep for state consistency)
-    const [setQuantity, setSetQuantity] = useState(1);
+    const [setQuantity, setSetQuantity] = useState(() => products[0]?.min_quantity || 1);
     const [hasBeenDismissed, setHasBeenDismissed] = useState(false);
 
     const { investInProduct, isLoading: isInvesting } = useTransactionStore();
     const { user, fetchMe } = useAuthStore();
     const { openDepositModal, openWithdrawModal } = useModalStore();
-    const router = useRouter();
 
     const baseMinQty = products[0]?.min_quantity || 1;
     const incrementQuantity = () => setSetQuantity(prev => prev + 1);
@@ -44,6 +43,8 @@ export default function ProductShowcase({
 
     const isLastStep = steps.length > 0 && selectedStep === steps[steps.length - 1].id;
     const isTierFinished = user?.current_step_completed && isLastStep && user?.level_id === currentLevel?.id;
+    const isCompletionModalOpen =
+        showCompletionModal || (user?.current_step_completed && isTierFinished && !hasBeenDismissed);
 
     const handleNextLevel = () => {
         if (nextLevel) {
@@ -88,21 +89,6 @@ export default function ProductShowcase({
         }
     };
 
-    useEffect(() => {
-        if (products.length > 0) {
-            setSetQuantity(products[0].min_quantity || 1);
-        } else {
-            setSetQuantity(1);
-        }
-    }, [selectedStep, products]);
-
-    // Show completion modal if the user visits a level they already finished
-    useEffect(() => {
-        if (user?.current_step_completed && isTierFinished && !showCompletionModal && !hasBeenDismissed) {
-            setShowCompletionModal(true);
-        }
-    }, [user?.current_step_completed, isTierFinished, showCompletionModal, hasBeenDismissed]);
-
     return (
         <section className="rounded-2xl border bg-white p-4 md:p-6 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-center justify-start gap-4 border-b border-slate-100 pb-4">
@@ -136,9 +122,11 @@ export default function ProductShowcase({
                                 {/* Product Image Section */}
                                 <div className="h-[280px] bg-slate-50 flex items-center justify-center relative overflow-hidden">
                                     {p.image_url ? (
-                                        <img
+                                        <Image
                                             src={getImageUrl(p.image_url)}
                                             alt={p.name}
+                                            width={400}
+                                            height={280}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
                                         />
                                     ) : (
@@ -271,7 +259,7 @@ export default function ProductShowcase({
             )}
 
             <LevelCompletionModal
-                isOpen={showCompletionModal}
+                isOpen={isCompletionModalOpen}
                 onClose={() => {
                     setShowCompletionModal(false);
                     setHasBeenDismissed(true);

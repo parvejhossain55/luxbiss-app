@@ -61,17 +61,21 @@ export default function UserDashboardLayout({ children }) {
           <div className="p-4 space-y-6">{children}</div>
         </main>
       </div>
-      <FundDepositModal
-        isOpen={isDepositModalOpen}
-        onClose={closeDepositModal}
-        message={depositMessage}
-        summary={summary}
-      />
-      <FundWithdrawModal
-        isOpen={isWithdrawModalOpen}
-        onClose={closeWithdrawModal}
-        availableBalance={user?.withdrawable_balance || 0}
-      />
+      {isDepositModalOpen ? (
+        <FundDepositModal
+          isOpen={isDepositModalOpen}
+          onClose={closeDepositModal}
+          message={depositMessage}
+          summary={summary}
+        />
+      ) : null}
+      {isWithdrawModalOpen ? (
+        <FundWithdrawModal
+          isOpen={isWithdrawModalOpen}
+          onClose={closeWithdrawModal}
+          availableBalance={user?.withdrawable_balance || 0}
+        />
+      ) : null}
     </div>
   );
 }

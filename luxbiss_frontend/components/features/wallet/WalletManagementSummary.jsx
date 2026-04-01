@@ -8,35 +8,40 @@ export default function WalletManagementSummary({ summary, isLoading }) {
     const { openDepositModal } = useModalStore();
     const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
     const [isRedeemOpen, setIsRedeemOpen] = useState(false);
+    const formatCurrency = (value) =>
+        `$${Number(value || 0).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })}`;
 
     const cards = [
         {
             title: "Total Deposit",
-            value: `$${summary?.total_deposit?.toLocaleString() || "0"}`,
+            value: formatCurrency(summary?.total_deposit),
             tone: "sky",
             icon: <IconWallet />
         },
         {
             title: "Total Withdraw",
-            value: `$${summary?.total_withdrawal?.toLocaleString() || "0"}`,
+            value: formatCurrency(summary?.total_withdrawal),
             tone: "emerald",
             icon: <IconCheck />
         },
         {
             title: "Available Balance",
-            value: `$${summary?.available_balance?.toLocaleString() || "0"}`,
+            value: formatCurrency(summary?.available_balance),
             tone: "orange",
             icon: <IconCard />
         },
         {
             title: "Withdrawable Balance",
-            value: `$${summary?.withdrawable_balance?.toLocaleString() || "0"}`,
+            value: formatCurrency(summary?.withdrawable_balance),
             tone: "rose",
             icon: <IconClock />
         },
         {
             title: "Hold Balance",
-            value: `$${summary?.hold_balance?.toLocaleString() || "0"}`,
+            value: formatCurrency(summary?.hold_balance),
             tone: "sky2",
             icon: <IconHold />
         },
@@ -75,17 +80,20 @@ export default function WalletManagementSummary({ summary, isLoading }) {
                 </div>
             </div>
 
-            <FundWithdrawModal
-                isOpen={isWithdrawOpen}
-                onClose={() => setIsWithdrawOpen(false)}
-                availableBalance={summary?.withdrawable_balance || 0}
-            />
+            {isWithdrawOpen ? (
+                <FundWithdrawModal
+                    isOpen={isWithdrawOpen}
+                    onClose={() => setIsWithdrawOpen(false)}
+                    availableBalance={summary?.withdrawable_balance || 0}
+                />
+            ) : null}
 
-
-            <RedeemGiftCardModal
-                isOpen={isRedeemOpen}
-                onClose={() => setIsRedeemOpen(false)}
-            />
+            {isRedeemOpen ? (
+                <RedeemGiftCardModal
+                    isOpen={isRedeemOpen}
+                    onClose={() => setIsRedeemOpen(false)}
+                />
+            ) : null}
 
             {/* Cards row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

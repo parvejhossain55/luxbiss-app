@@ -65,7 +65,7 @@ export default function BalanceAndWithdraw({ summary, user, isLoading }) {
 
     const totalDeposit = summary?.total_deposit ?? 0;
     const totalWithdrawal = summary?.total_withdrawal ?? 0;
-    const availableBalance = user?.balance ?? 0;
+    const availableBalance = summary?.available_balance ?? user?.balance ?? 0;
     const holdBalance = user?.hold_balance ?? 0;
     const withdrawableBalance = user?.withdrawable_balance ?? 0;
 

@@ -10,10 +10,9 @@ export default function AddWalletModal({ isOpen, onClose, initialValue, onSubmit
 
     useEffect(() => {
         if (isOpen) {
-            setDraft(initialValue || {});
             fetchWallets();
         }
-    }, [isOpen, initialValue, fetchWallets]);
+    }, [fetchWallets, isOpen]);
 
     if (!isOpen) return null;
 
