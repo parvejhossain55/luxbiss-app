@@ -115,7 +115,7 @@ export default function ProfilePage() {
                                     {profile.header.name}
                                 </h1>
                                 <span className="inline-flex items-center justify-center rounded-full bg-[#E8F5E9] px-2 py-0.5 text-[12px] font-semibold text-[#4CAF50] font-['Plus_Jakarta_Sans']">
-                                    {profile.header.status}
+                                    Active
                                 </span>
                             </div>
 

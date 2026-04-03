@@ -116,7 +116,7 @@ export default function Footer() {
 
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-slate-700" />
-                <span>Phone: +1 234-567 8900</span>
+                <span>Phone: +1 312-579 4472</span>
               </div>
 
               <div className="flex items-center gap-2">
