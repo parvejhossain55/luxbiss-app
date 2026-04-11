@@ -16,15 +16,12 @@ export default function UserSidebar({ open, onClose }) {
     onClose?.(); // close sidebar on mobile after click
   };
 
-  const name = user?.name || "User";
-  const email = user?.email || "";
-  const avatarUrl = user?.profile_photo;
-  const telegram = user?.telegram_username;
   const manager = user?.manager;
-  const managerName = manager?.name || "Personal Manager";
-  const managerPhoto = manager?.profile_photo ? getImageUrl(manager.profile_photo) : "";
-  const managerTelegram = manager?.telegram_username ? `@${manager.telegram_username.replace(/^@/, "")}` : "@manager";
-  const managerTelegramLink = manager?.telegram_username ? `https://t.me/${manager.telegram_username.replace(/^@/, "")}` : "#";
+  const defaultManagerUsername = "Caro_Lxbiss";
+  const managerName = manager?.name || "Caroline Knight";
+  const managerPhoto = manager?.profile_photo ? getImageUrl(manager.profile_photo) : "/Manager.jpg";
+  const managerTelegram = `@${(manager?.telegram_username || defaultManagerUsername).replace(/^@/, "")}`;
+  const managerTelegramLink = `https://t.me/${(manager?.telegram_username || defaultManagerUsername).replace(/^@/, "")}`;
 
   return (
     <>
@@ -132,7 +129,7 @@ export default function UserSidebar({ open, onClose }) {
                 href={managerTelegramLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`w-[134px] h-[36px] bg-[#1FB0D8] rounded-[4px] flex items-center justify-center gap-1 text-white transition-all mt-1 ${manager?.telegram_username ? "hover:brightness-110 active:scale-95" : "opacity-60 pointer-events-none"}`}
+                className="w-[134px] h-[36px] bg-[#1FB0D8] rounded-[4px] flex items-center justify-center gap-1 text-white transition-all mt-1 hover:brightness-110 active:scale-95"
               >
                 <div className="w-5 h-5 flex items-center justify-center">
                   <Send size={16} fill="white" className="rotate-[-15deg] translate-y-[-1px]" />
