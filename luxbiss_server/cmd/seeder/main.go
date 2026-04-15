@@ -12,6 +12,7 @@ import (
 	"github.com/parvej/luxbiss_server/internal/modules/manager"
 	"github.com/parvej/luxbiss_server/internal/modules/product"
 	"github.com/parvej/luxbiss_server/internal/modules/transaction"
+	"github.com/parvej/luxbiss_server/internal/modules/transactiontemplate"
 	"github.com/parvej/luxbiss_server/internal/modules/user"
 	"github.com/parvej/luxbiss_server/internal/modules/wallet"
 )
@@ -36,7 +37,11 @@ func main() {
 	}
 	defer sqlDB.Close()
 
-	if err := db.AutoMigrate(&user.User{}, &product.Level{}, &product.Product{}, &wallet.Wallet{}, &giftcard.Giftcard{}, &manager.Manager{}, &transaction.Transaction{}); err != nil {
+	if err := database.NormalizeTransactionTemplateDateColumn(db); err != nil {
+		appLogger.Fatalf("Failed to normalize transaction template dates: %v", err)
+	}
+
+	if err := db.AutoMigrate(&user.User{}, &product.Level{}, &product.Product{}, &wallet.Wallet{}, &giftcard.Giftcard{}, &manager.Manager{}, &transaction.Transaction{}, &transactiontemplate.Template{}); err != nil {
 		appLogger.Fatalf("Failed to auto-migrate: %v", err)
 	}
 
@@ -48,11 +53,12 @@ func main() {
 	registry.Register(&seeder.LevelSeeder{})
 	registry.Register(&seeder.ProductSeeder{})
 	registry.Register(&seeder.WalletSeeder{})
+	registry.Register(&seeder.TransactionTemplateSeeder{})
 	registry.Register(&seeder.ManagerSeeder{})
 
 	if *truncate {
 		appLogger.Info("Truncating tables...")
-		tables := []string{"users", "levels", "products", "wallets", "giftcards", "managers", "transactions"}
+		tables := []string{"users", "levels", "products", "wallets", "giftcards", "managers", "transactions", "transaction_templates"}
 		if err := registry.TruncateAll(db, tables); err != nil {
 			appLogger.Fatalf("Failed to truncate tables: %v", err)
 		}

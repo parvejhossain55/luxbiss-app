@@ -51,13 +51,19 @@ export const userService = {
         return res.data;
     },
 
-    // 7. Delete User (Admin)
+    // 7. Insert Template Transactions (Admin, ignored users only)
+    async insertTemplateTransactions(id) {
+        const res = await api.post(`/users/${id}/insert-template-transactions`);
+        return res.data;
+    },
+
+    // 8. Delete User (Admin)
     async deleteUser(id) {
         const res = await api.delete(`/users/${id}`);
         return res.data;
     },
 
-    // 8. Advance Users to Next Step (Admin)
+    // 9. Advance Users to Next Step (Admin)
     async advanceUsersToNextStep(level_id, current_step_id, next_level_id, next_step_id) {
         const res = await api.post("/users/advance-step", { level_id, current_step_id, next_level_id, next_step_id });
         return res.data;

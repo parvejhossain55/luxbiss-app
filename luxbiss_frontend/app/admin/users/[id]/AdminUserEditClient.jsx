@@ -45,13 +45,14 @@ export default function AdminUserEditPage() {
     }, [params.id, userId]);
 
     const { user } = useAuthStore();
-    const { fetchUser, updateUser, approveHoldBalance, isLoading: storeLoading } = useUserStore();
+    const { fetchUser, updateUser, approveHoldBalance, insertTemplateTransactions, isLoading: storeLoading } = useUserStore();
     const { fetchSummary } = useTransactionStore();
     const { levels, fetchLevels, fetchSteps } = useProductStore();
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isTxModalOpen, setIsTxModalOpen] = useState(false);
+    const [isInsertingTransactions, setIsInsertingTransactions] = useState(false);
     const [stepsByLevel, setStepsByLevel] = useState({});
     const [formData, setFormData] = useState({
         name: "",
@@ -199,6 +200,35 @@ export default function AdminUserEditPage() {
         }
     };
 
+    const handleInsertTemplateTransactions = async () => {
+        if (formData.status !== "Ignored") {
+            toast.error("This feature only works for ignored users");
+            return;
+        }
+
+        setIsInsertingTransactions(true);
+
+        try {
+            const res = await insertTemplateTransactions(userId);
+            if (!res.success) {
+                throw new Error(res.message || "Failed to insert template transactions");
+            }
+
+            await loadUser();
+            const insertedCount = res.data?.inserted ?? 0;
+            const skippedCount = res.data?.skipped ?? 0;
+            toast.success(
+                insertedCount > 0
+                    ? `${insertedCount} transactions inserted${skippedCount > 0 ? `, ${skippedCount} skipped` : ""}`
+                    : "All template transactions already exist for this user"
+            );
+        } catch (err) {
+            toast.error(err.message || "Failed to insert transactions");
+        } finally {
+            setIsInsertingTransactions(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <AdminDashboardLayout>
@@ -241,6 +271,16 @@ export default function AdminUserEditPage() {
                             {isSaving ? <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
                             {isSaving ? "Saving..." : "Save Changes"}
                         </button>
+                        {formData.status === "Ignored" && (
+                            <button
+                                onClick={handleInsertTemplateTransactions}
+                                disabled={isInsertingTransactions}
+                                className="flex items-center gap-2 px-6 py-2 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.98] disabled:opacity-70"
+                            >
+                                {isInsertingTransactions ? <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <History size={18} />}
+                                {isInsertingTransactions ? "Inserting..." : "Insert Transaction"}
+                            </button>
+                        )}
                         {formData.status === "Ignored" && (
                             <button
                                 onClick={() => setIsTxModalOpen(true)}
@@ -456,13 +496,23 @@ export default function AdminUserEditPage() {
                             </div>
 
                             {formData.status === "Ignored" && (
-                                <button
-                                    onClick={() => setIsTxModalOpen(true)}
-                                    className="w-full mt-8 py-3 bg-sky-50 text-sky-600 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-sky-100 transition-colors"
-                                >
-                                    <TrendingUp size={18} />
-                                    Create Manual Deposit/Withdraw
-                                </button>
+                                <div className="mt-8 grid gap-3 md:grid-cols-2">
+                                    <button
+                                        onClick={handleInsertTemplateTransactions}
+                                        disabled={isInsertingTransactions}
+                                        className="py-3 bg-emerald-50 text-emerald-600 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-100 transition-colors disabled:opacity-70"
+                                    >
+                                        {isInsertingTransactions ? <div className="h-4 w-4 border-2 border-emerald-300/40 border-t-emerald-600 rounded-full animate-spin" /> : <History size={18} />}
+                                        {isInsertingTransactions ? "Inserting..." : "Insert Transaction"}
+                                    </button>
+                                    <button
+                                        onClick={() => setIsTxModalOpen(true)}
+                                        className="py-3 bg-sky-50 text-sky-600 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-sky-100 transition-colors"
+                                    >
+                                        <TrendingUp size={18} />
+                                        Create Manual Deposit/Withdraw
+                                    </button>
+                                </div>
                             )}
                         </div>
 

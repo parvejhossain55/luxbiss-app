@@ -10,11 +10,12 @@ import { formatTableDate } from "@/lib/utils";
 
 const UserManagement = () => {
     const router = useRouter();
-    const { users, pagination: serverPagination, isLoading, fetchUsers, updateUser } = useUserStore();
+    const { users, pagination: serverPagination, isLoading, fetchUsers, updateUser, deleteUser } = useUserStore();
     const [activeTab, setActiveTab] = useState("All User");
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
-    const [confirmData, setConfirmData] = useState({ open: false, user: null });
+    const [confirmData, setConfirmData] = useState({ open: false, user: null, type: "ignore" });
+    const [deleteData, setDeleteData] = useState({ open: false, user: null });
 
     useEffect(() => {
         const fetchParams = { page, per_page: perPage };
@@ -108,7 +109,7 @@ const UserManagement = () => {
                         </button>
                         <button
                             onClick={() => {
-                                setConfirmData({ open: true, user: row });
+                                setConfirmData({ open: true, user: row, type: "ignore" });
                             }}
                             className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-colors shadow-sm border ${isIgnored
                                 ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
@@ -116,6 +117,14 @@ const UserManagement = () => {
                                 }`}
                         >
                             {isIgnored ? "Restore" : "Ignore"}
+                        </button>
+                        <button
+                            onClick={() => {
+                                setDeleteData({ open: true, user: row });
+                            }}
+                            className="px-4 py-1.5 text-xs font-bold rounded-lg transition-colors shadow-sm border bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                        >
+                            Delete
                         </button>
                     </div>
                 );
@@ -137,6 +146,23 @@ const UserManagement = () => {
                 fetchUsers({ page, per_page: perPage });
             } else {
                 toast.error(res.message || "Operation failed");
+            }
+        } catch (err) {
+            toast.error("An error occurred");
+        }
+    };
+
+    const handleDeleteAction = async () => {
+        const { user: row } = deleteData;
+        if (!row) return;
+
+        try {
+            const res = await deleteUser(row.id);
+            if (res.success) {
+                toast.success("User deleted successfully!");
+                fetchUsers({ page, per_page: perPage });
+            } else {
+                toast.error(res.message || "Delete failed");
             }
         } catch (err) {
             toast.error("An error occurred");
@@ -188,7 +214,7 @@ const UserManagement = () => {
 
             <BeautifulConfirmModal
                 isOpen={confirmData.open}
-                onClose={() => setConfirmData({ open: false, user: null })}
+                onClose={() => setConfirmData({ open: false, user: null, type: "ignore" })}
                 onConfirm={handleConfirmAction}
                 title={confirmData.user?.status?.toLowerCase() === "ignored" ? "Restore User?" : "Ignore User?"}
                 message={confirmData.user?.status?.toLowerCase() === "ignored"
@@ -197,6 +223,16 @@ const UserManagement = () => {
                 }
                 variant={confirmData.user?.status?.toLowerCase() === "ignored" ? "success" : "warning"}
                 confirmText={confirmData.user?.status?.toLowerCase() === "ignored" ? "Restore Now" : "Yes, Ignore"}
+            />
+
+            <BeautifulConfirmModal
+                isOpen={deleteData.open}
+                onClose={() => setDeleteData({ open: false, user: null })}
+                onConfirm={handleDeleteAction}
+                title="Delete User?"
+                message={`Are you sure you want to permanently delete user ${deleteData.user?.email}? This action cannot be undone.`}
+                variant="danger"
+                confirmText="Yes, Delete"
             />
         </div>
     );

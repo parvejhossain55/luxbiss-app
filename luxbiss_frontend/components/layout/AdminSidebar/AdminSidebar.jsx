@@ -112,10 +112,10 @@ export default function Sidebar({ open, onClose }) {
               onClick={() => go("/admin/ignored-users")}
             />
             <NavItem
-              active={pathname === "/admin/telegram-setup"}
-              label="Telegram Steup"
-              icon={<IconSend />}
-              onClick={() => go("/admin/telegram-setup")}
+              active={pathname === "/admin/transaction-templates"}
+              label="Transaction Template"
+              icon={<IconTemplate />}
+              onClick={() => go("/admin/transaction-templates")}
             />
           </nav>
 
@@ -249,6 +249,16 @@ function IconWallet() {
       <path d="M4 7h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" />
       <path d="M4 7V6a2 2 0 0 1 2-2h12" />
       <path d="M16 13h3" />
+    </BaseIcon>
+  );
+}
+function IconTemplate() {
+  return (
+    <BaseIcon>
+      <path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+      <path d="M8 9h8" />
+      <path d="M8 13h8" />
+      <path d="M8 17h5" />
     </BaseIcon>
   );
 }

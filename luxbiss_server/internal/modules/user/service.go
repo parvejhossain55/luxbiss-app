@@ -2,23 +2,28 @@ package user
 
 import (
 	"context"
+	"sort"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/parvej/luxbiss_server/internal/common"
 	"github.com/parvej/luxbiss_server/internal/logger"
+	"github.com/parvej/luxbiss_server/internal/modules/transactiontemplate"
 	"github.com/parvej/luxbiss_server/pkg/hash"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 type UserService struct {
-	repo Repository
-	log  *logger.Logger
-	rdb  *redis.Client
+	repo                 Repository
+	transactionTemplates transactiontemplate.Repository
+	log                  *logger.Logger
+	rdb                  *redis.Client
 }
 
-func NewService(repo Repository, log *logger.Logger, rdb *redis.Client) *UserService {
-	return &UserService{repo: repo, log: log, rdb: rdb}
+func NewService(repo Repository, templateRepo transactiontemplate.Repository, log *logger.Logger, rdb *redis.Client) *UserService {
+	return &UserService{repo: repo, transactionTemplates: templateRepo, log: log, rdb: rdb}
 }
 
 func (s *UserService) Create(ctx context.Context, req *CreateUserRequest) (*User, error) {
@@ -244,15 +249,139 @@ func (s *UserService) ApproveHoldBalance(ctx context.Context, id string) (*User,
 	return user, nil
 }
 
+func (s *UserService) InsertTemplateTransactions(ctx context.Context, id string) (*InsertTemplateTransactionsResponse, error) {
+	user, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if user.Status != StatusIgnored {
+		return nil, common.ErrBadRequest("Template transactions can only be inserted for ignored users")
+	}
+
+	templates, err := s.transactionTemplates.List(ctx)
+	if err != nil {
+		s.log.Errorw("Failed to list transaction templates", "error", err, "user_id", id)
+		return nil, common.ErrInternal(err)
+	}
+
+	if len(templates) == 0 {
+		return &InsertTemplateTransactionsResponse{Inserted: 0, Skipped: 0}, nil
+	}
+
+	sort.Slice(templates, func(i, j int) bool {
+		return templates[i].Date.Before(templates[j].Date)
+	})
+
+	db := s.repo.DB().(*gorm.DB)
+	result := &InsertTemplateTransactionsResponse{}
+
+	err = db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		for _, template := range templates {
+			var existingCount int64
+			if err := tx.Table("transactions").
+				Where("user_id = ? AND type = ? AND amount = ? AND note = ? AND created_at = ?",
+					user.ID, template.Type, template.Amount, template.Note, template.Date).
+				Count(&existingCount).Error; err != nil {
+				return err
+			}
+
+			if existingCount > 0 {
+				result.Skipped++
+				continue
+			}
+
+			txType := template.Type
+			if txType == transactiontemplate.TypeWithdraw {
+				txType = "withdraw"
+			}
+
+			record := map[string]interface{}{
+				"id":            uuid.New().String(),
+				"user_id":       user.ID,
+				"type":          txType,
+				"amount":        template.Amount,
+				"profit_amount": 0,
+				"status":        "completed",
+				"tx_hash":       common.GenerateHash(),
+				"note":          template.Note,
+				"created_at":    template.Date,
+				"updated_at":    template.Date,
+			}
+
+			if err := tx.Table("transactions").Create(record).Error; err != nil {
+				return err
+			}
+
+			result.Inserted++
+		}
+
+		if result.Inserted == 0 {
+			return nil
+		}
+
+		return nil
+	})
+	if err != nil {
+		s.log.Errorw("Failed to insert template transactions", "error", err, "user_id", id)
+		return nil, common.ErrInternal(err)
+	}
+
+	s.log.Infow("Inserted template transactions for ignored user", "user_id", id, "inserted", result.Inserted, "skipped", result.Skipped)
+	return result, nil
+}
+
 func (s *UserService) CompletePendingTransactions(ctx context.Context, userID string) error {
 	return s.repo.CompletePendingTransactions(ctx, userID)
 }
 
 func (s *UserService) Delete(ctx context.Context, id string) error {
+	if err := s.DeleteUserRelatedData(ctx, id); err != nil {
+		s.log.Errorw("Failed to delete user related data", "error", err, "user_id", id)
+		return common.ErrInternal(err)
+	}
+
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return err
 	}
 	s.log.Infow("User deleted successfully", "user_id", id)
+	return nil
+}
+
+func (s *UserService) DeleteUserRelatedData(ctx context.Context, userID string) error {
+	if err := s.deleteTransactions(ctx, userID); err != nil {
+		return err
+	}
+
+	if err := s.deleteGiftcards(ctx, userID); err != nil {
+		return err
+	}
+
+	s.rdb.Del(ctx, "refresh_token:"+userID)
+	revokedKey := "revoked_user:" + userID
+	_ = s.rdb.Del(ctx, revokedKey)
+
+	s.log.Infow("User related data deleted successfully", "user_id", userID)
+	return nil
+}
+
+func (s *UserService) deleteTransactions(ctx context.Context, userID string) error {
+	db := s.repo.DB().(*gorm.DB)
+	result := db.WithContext(ctx).Exec("DELETE FROM transactions WHERE user_id = ?", userID)
+	if result.Error != nil {
+		return result.Error
+	}
+	s.log.Infow("Deleted user transactions", "user_id", userID, "count", result.RowsAffected)
+	return nil
+}
+
+func (s *UserService) deleteGiftcards(ctx context.Context, userID string) error {
+	db := s.repo.DB().(*gorm.DB)
+	result := db.WithContext(ctx).Exec("DELETE FROM giftcards WHERE user_id = ?", userID)
+	if result.Error != nil {
+		return result.Error
+	}
+	s.log.Infow("Deleted user giftcards", "user_id", userID, "count", result.RowsAffected)
 	return nil
 }
 

@@ -246,3 +246,7 @@ func (r *GormRepository) AdvanceUsersToNextStep(ctx context.Context, levelID, cu
 
 	return result
 }
+
+func (r *GormRepository) DB() interface{} {
+	return r.db
+}

@@ -18,6 +18,7 @@ func RegisterRoutes(rg *gin.RouterGroup, handler *Handler, jwtManager *jwt.Manag
 		users.PUT("/:id", handler.Update)
 		users.POST("/advance-step", middleware.RequireRole("admin"), handler.AdvanceUsersToNextStep)
 		users.POST("/:id/approve-hold", middleware.RequireRole("admin"), handler.ApproveHoldBalance)
+		users.POST("/:id/insert-template-transactions", middleware.RequireRole("admin"), handler.InsertTemplateTransactions)
 		users.DELETE("/:id", middleware.RequireRole("admin"), handler.Delete)
 	}
 }

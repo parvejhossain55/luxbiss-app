@@ -112,6 +112,24 @@ export const useUserStore = create((set, get) => ({
     },
 
     /**
+     * Insert template transactions for ignored user
+     */
+    insertTemplateTransactions: async (id) => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await userService.insertTemplateTransactions(id);
+            if (res.success) {
+                return { success: true, data: res.data };
+            }
+            return { success: false, message: res.message };
+        } catch (err) {
+            return { success: false, message: err.response?.data?.message || err.message || "Failed to insert template transactions" };
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    /**
      * Delete user
      */
     deleteUser: async (id) => {

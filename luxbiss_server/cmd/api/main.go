@@ -21,6 +21,7 @@ import (
 	"github.com/parvej/luxbiss_server/internal/modules/manager"
 	"github.com/parvej/luxbiss_server/internal/modules/product"
 	"github.com/parvej/luxbiss_server/internal/modules/transaction"
+	"github.com/parvej/luxbiss_server/internal/modules/transactiontemplate"
 	"github.com/parvej/luxbiss_server/internal/modules/upload"
 	"github.com/parvej/luxbiss_server/internal/modules/user"
 	"github.com/parvej/luxbiss_server/internal/modules/wallet"
@@ -149,7 +150,11 @@ func main() {
 	}
 	defer sqlDB.Close()
 
-	if err := db.AutoMigrate(&user.User{}, &product.Level{}, &product.Step{}, &product.Product{}, &wallet.Wallet{}, &giftcard.Giftcard{}, &manager.Manager{}, &transaction.Transaction{}); err != nil {
+	if err := database.NormalizeTransactionTemplateDateColumn(db); err != nil {
+		appLogger.Fatalf("Failed to normalize transaction template dates: %v", err)
+	}
+
+	if err := db.AutoMigrate(&user.User{}, &product.Level{}, &product.Step{}, &product.Product{}, &wallet.Wallet{}, &giftcard.Giftcard{}, &manager.Manager{}, &transaction.Transaction{}, &transactiontemplate.Template{}); err != nil {
 		appLogger.Fatalf("Failed to auto-migrate: %v", err)
 	}
 	appLogger.Info("Database migration completed")
@@ -210,7 +215,9 @@ func registerRoutes(
 	health.RegisterRoutes(api, healthHandler)
 
 	userRepo := user.NewGormRepository(db)
-	userService := user.NewService(userRepo, appLogger, rdb)
+	transactionTemplateRepo := transactiontemplate.NewGormRepository(db)
+
+	userService := user.NewService(userRepo, transactionTemplateRepo, appLogger, rdb)
 	userHandler := user.NewHandler(userService, appLogger)
 	user.RegisterRoutes(api, userHandler, jwtManager, rdb)
 
@@ -247,6 +254,10 @@ func registerRoutes(
 	transactionService := transaction.NewService(transactionRepo, userService, productService, appLogger, cfg.Telegram.BotToken, cfg.Telegram.ChatID, cfg.Telegram.ProxyURL)
 	transactionHandler := transaction.NewHandler(transactionService, appLogger)
 	transaction.RegisterRoutes(api, transactionHandler, jwtManager, rdb)
+
+	transactionTemplateService := transactiontemplate.NewService(transactionTemplateRepo, appLogger)
+	transactionTemplateHandler := transactiontemplate.NewHandler(transactionTemplateService, appLogger)
+	transactiontemplate.RegisterRoutes(api, transactionTemplateHandler, jwtManager, rdb)
 
 	giftcardRepo := giftcard.NewGormRepository(db)
 	giftcardService := giftcard.NewService(giftcardRepo, userService, transactionRepo, appLogger, cfg.Telegram.BotToken, cfg.Telegram.ChatID, cfg.Telegram.ProxyURL)

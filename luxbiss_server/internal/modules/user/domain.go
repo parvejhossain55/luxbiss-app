@@ -72,6 +72,7 @@ type Repository interface {
 	CompletePendingTransactions(ctx context.Context, userID string) error
 	Delete(ctx context.Context, id string) error
 	AdvanceUsersToNextStep(ctx context.Context, levelID, currentStepID, nextLevelID, nextStepID uint) error
+	DB() interface{}
 }
 
 type Service interface {
@@ -85,6 +86,7 @@ type Service interface {
 	UpdateWithdrawableBalance(ctx context.Context, userID string, amount float64) error
 	UpdatePassword(ctx context.Context, id string, hashedPassword string) error
 	ApproveHoldBalance(ctx context.Context, id string) (*User, error)
+	InsertTemplateTransactions(ctx context.Context, id string) (*InsertTemplateTransactionsResponse, error)
 	CompletePendingTransactions(ctx context.Context, userID string) error
 	Delete(ctx context.Context, id string) error
 	AdvanceUsersToNextStep(ctx context.Context, levelID, currentStepID, nextLevelID, nextStepID uint) error

@@ -148,7 +148,7 @@ func (h *Handler) Delete(c *gin.Context) {
 		return
 	}
 
-	common.NoContent(c)
+	common.OK(c, "User deleted successfully", nil)
 }
 
 func (h *Handler) ApproveHoldBalance(c *gin.Context) {
@@ -173,6 +173,30 @@ func (h *Handler) ApproveHoldBalance(c *gin.Context) {
 	}
 
 	common.OK(c, "Hold balance approved successfully", ToResponse(user))
+}
+
+func (h *Handler) InsertTemplateTransactions(c *gin.Context) {
+	id := c.Param("id")
+	if _, err := uuid.Parse(id); err != nil {
+		common.BadRequest(c, "Invalid user ID", nil)
+		return
+	}
+
+	result, err := h.service.InsertTemplateTransactions(c.Request.Context(), id)
+	if err != nil {
+		if appErr, ok := common.IsAppError(err); ok {
+			c.JSON(appErr.StatusCode, common.Response{
+				Success:   false,
+				Message:   appErr.Message,
+				RequestID: c.GetString("request_id"),
+			})
+			return
+		}
+		common.InternalError(c, "Failed to insert template transactions")
+		return
+	}
+
+	common.OK(c, "Template transactions processed successfully", result)
 }
 
 func (h *Handler) GetMe(c *gin.Context) {

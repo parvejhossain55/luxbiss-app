@@ -86,6 +86,11 @@ type UserResponse struct {
 	UpdatedAt         string `json:"updated_at"`
 }
 
+type InsertTemplateTransactionsResponse struct {
+	Inserted int `json:"inserted"`
+	Skipped  int `json:"skipped"`
+}
+
 func ToResponse(u *User) *UserResponse {
 	var managerResponse *ManagerResponse
 	if u.Manager != nil {
